@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[macro_use]
-extern crate log;
+//! Message trait
 
-pub mod error;
-pub mod message;
+/// A message sent between processes as part of a consensus algorithm.
+///
+/// [`Message`]s are sent across a network which connects the processes together[^note].
+///
+/// [^note]: For a full explanation of messages and the relation to other components, see Cachin,
+/// Guerraoui, and Rodrigues, Reliable and Secure Distributed Programming, 2nd ed., 2.1.1.
+pub trait Message: Clone {}
