@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[macro_use]
-extern crate log;
+//! Process trait
 
-pub mod error;
-pub mod message;
-pub mod process;
+/// An identifier for an entity participating in consensus.
+///
+/// Multiple distributed processes coordinate to execute a consensus algorithm by sending messages
+/// across a network that connects processes together[^note].
+///
+/// [^note]: For a full explanation of processes and the relation to other components, see Cachin,
+/// Guerraoui, and Rodrigues, Reliable and Secure Distributed Programming, 2nd ed., 2.1.1.
+pub trait Process: Copy + Eq + PartialEq {}
