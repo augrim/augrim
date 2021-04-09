@@ -37,6 +37,12 @@ build:
     done
     echo "\n\033[92mBuild Success\033[0m\n"
 
+ci-build: build
+
+ci-lint: lint
+
+ci-test: test
+
 clean:
     cargo clean
 
