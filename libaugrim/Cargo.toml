@@ -14,7 +14,7 @@
 
 [package]
 name = "augrim"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Cargill Corporation"]
 edition = "2018"
 
