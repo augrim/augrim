@@ -36,7 +36,9 @@ experimental = [
     # The following features are experimental:
     "algorithm",
     "links",
+    "time",
 ]
 
 algorithm = []
 links = []
+time = []
