@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod coordinator_action;
-mod coordinator_algorithm;
-mod coordinator_context;
-mod coordinator_event;
-mod coordinator_message;
-mod message;
+use crate::algorithm::Value;
+use crate::process::Process;
 
-pub use coordinator_action::{
-    CoordinatorAction, CoordinatorActionAlarm, CoordinatorActionNotification,
-};
-pub use coordinator_algorithm::CoordinatorAlgorithm;
-pub use coordinator_context::{CoordinatorContext, CoordinatorState};
-pub use coordinator_event::CoordinatorEvent;
-pub use coordinator_message::CoordinatorMessage;
-pub use message::TwoPhaseCommitMessage;
+use super::CoordinatorMessage;
 
-pub type Epoch = u64;
+pub enum CoordinatorEvent<P, V>
+where
+    P: Process,
+    V: Value,
+{
+    Alarm(),
+    Deliver(P, CoordinatorMessage),
+    Start(V),
+    Vote(bool),
+}
