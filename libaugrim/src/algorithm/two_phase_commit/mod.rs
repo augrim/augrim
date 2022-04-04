@@ -11,28 +11,3 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use crate::error::InternalError;
-use crate::process::Process;
-
-#[cfg(feature = "algorithm-two-phase-commit")]
-pub mod two_phase_commit;
-
-pub trait Action {}
-pub trait Context {}
-pub trait Value: Clone {}
-
-pub trait Algorithm<P>
-where
-    P: Process,
-{
-    type Event;
-    type Action;
-    type Context;
-
-    fn event(
-        &self,
-        event: Self::Event,
-        context: Self::Context,
-    ) -> Result<Vec<Self::Action>, InternalError>;
-}
