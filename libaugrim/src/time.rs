@@ -1,4 +1,4 @@
-// Copyright 2021 Cargill Incorporated
+// Copyright 2021-2022 Cargill Incorporated
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[macro_use]
-extern crate log;
+use std::cmp::PartialOrd;
+use std::ops::Add;
+use std::time::Duration;
 
-#[cfg(feature = "algorithm")]
-pub mod algorithm;
-pub mod error;
-#[cfg(feature = "links")]
-pub mod links;
-pub mod message;
-pub mod process;
-#[cfg(feature = "time")]
-pub mod time;
+pub trait Time: Add<Duration, Output = Self> + PartialOrd + Copy {}
+
+pub trait TimeSource {
+    type Time: Time;
+
+    fn now(&self) -> Self::Time;
+}
