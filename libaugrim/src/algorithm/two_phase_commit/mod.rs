@@ -18,6 +18,11 @@ mod coordinator_context;
 mod coordinator_event;
 mod coordinator_message;
 mod message;
+mod participant_action;
+mod participant_algorithm;
+mod participant_context;
+mod participant_event;
+mod participant_message;
 
 pub use coordinator_action::{
     CoordinatorAction, CoordinatorActionAlarm, CoordinatorActionNotification,
@@ -27,5 +32,12 @@ pub use coordinator_context::{CoordinatorContext, CoordinatorState};
 pub use coordinator_event::CoordinatorEvent;
 pub use coordinator_message::CoordinatorMessage;
 pub use message::TwoPhaseCommitMessage;
+pub use participant_action::{
+    ParticipantAction, ParticipantActionAlarm, ParticipantActionNotification,
+};
+pub use participant_algorithm::ParticipantAlgorithm;
+pub use participant_context::{ParticipantContext, ParticipantState};
+pub use participant_event::ParticipantEvent;
+pub use participant_message::ParticipantMessage;
 
 pub type Epoch = u64;
