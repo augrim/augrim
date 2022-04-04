@@ -12,8 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod message;
+use crate::algorithm::Value;
+use crate::message::Message;
 
-pub use message::TwoPhaseCommitMessage;
+use super::Epoch;
 
-pub type Epoch = u64;
+#[derive(Clone)]
+pub enum TwoPhaseCommitMessage<V>
+where
+    V: Value,
+{
+    VoteRequest(Epoch, V),
+    VoteResponse(Epoch, bool),
+    Commit(Epoch),
+    Abort(Epoch),
+    DecisionRequest(Epoch),
+}
+
+impl<V> Message for TwoPhaseCommitMessage<V> where V: Value {}
