@@ -74,8 +74,12 @@
 //! }
 //! ```
 
+#[cfg(feature = "algorithm")]
+mod algorithm;
 mod internal;
 mod invalid_state;
 
+#[cfg(feature = "algorithm")]
+pub use algorithm::AlgorithmError;
 pub use internal::InternalError;
 pub use invalid_state::InvalidStateError;
