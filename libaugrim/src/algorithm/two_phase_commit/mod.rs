@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::error::InternalError;
-use crate::process::Process;
+mod coordinator_action;
+mod coordinator_algorithm;
+mod coordinator_context;
+mod coordinator_event;
+mod coordinator_message;
+mod message;
 
-#[cfg(feature = "algorithm-two-phase-commit")]
-pub mod two_phase_commit;
+pub use coordinator_action::{
+    CoordinatorAction, CoordinatorActionAlarm, CoordinatorActionNotification,
+};
+pub use coordinator_algorithm::CoordinatorAlgorithm;
+pub use coordinator_context::{CoordinatorContext, CoordinatorState};
+pub use coordinator_event::CoordinatorEvent;
+pub use coordinator_message::CoordinatorMessage;
+pub use message::TwoPhaseCommitMessage;
 
-pub trait Action {}
-pub trait Context {}
-pub trait Value: Clone {}
-
-pub trait Algorithm<P>
-where
-    P: Process,
-{
-    type Event;
-    type Action;
-    type Context;
-
-    fn event(
-        &self,
-        event: Self::Event,
-        context: Self::Context,
-    ) -> Result<Vec<Self::Action>, InternalError>;
-}
+pub type Epoch = u64;

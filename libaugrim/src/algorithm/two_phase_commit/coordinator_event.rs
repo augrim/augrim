@@ -12,27 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::error::InternalError;
+use crate::algorithm::Value;
 use crate::process::Process;
 
-#[cfg(feature = "algorithm-two-phase-commit")]
-pub mod two_phase_commit;
+use super::CoordinatorMessage;
 
-pub trait Action {}
-pub trait Context {}
-pub trait Value: Clone {}
-
-pub trait Algorithm<P>
+pub enum CoordinatorEvent<P, V>
 where
     P: Process,
+    V: Value,
 {
-    type Event;
-    type Action;
-    type Context;
-
-    fn event(
-        &self,
-        event: Self::Event,
-        context: Self::Context,
-    ) -> Result<Vec<Self::Action>, InternalError>;
+    Alarm(),
+    Deliver(P, CoordinatorMessage),
+    Start(V),
+    Vote(bool),
 }
