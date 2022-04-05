@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 use std::time::Duration;
 
 use crate::algorithm::{Algorithm, Value};
-use crate::error::InternalError;
+use crate::error::AlgorithmError;
 use crate::process::Process;
 use crate::time::TimeSource;
 
@@ -135,7 +135,7 @@ where
         &self,
         event: Self::Event,
         mut context: Self::Context,
-    ) -> Result<Vec<Self::Action>, InternalError> {
+    ) -> Result<Vec<Self::Action>, AlgorithmError> {
         match event {
             // In response to a RequestForStart notification, a Start event provides the next value
             // that should be considered.
