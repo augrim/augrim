@@ -83,7 +83,7 @@ where
             .filter(|p| p.vote.unwrap_or(false))
         {
             actions.push(CoordinatorAction::SendMessage(
-                participant.process,
+                participant.process.clone(),
                 TwoPhaseCommitMessage::Abort(*context.epoch()),
             ))
         }
@@ -150,7 +150,7 @@ where
                 // Send a VoteRequest message to all participants
                 for participant in context.participants() {
                     actions.push(CoordinatorAction::SendMessage(
-                        participant.process,
+                        participant.process.clone(),
                         TwoPhaseCommitMessage::VoteRequest(*context.epoch(), value.clone()),
                     ))
                 }
@@ -189,7 +189,7 @@ where
                     // Send `Commit` to all participants.
                     for participant in context.participants() {
                         actions.push(CoordinatorAction::SendMessage(
-                            participant.process,
+                            participant.process.clone(),
                             TwoPhaseCommitMessage::Commit(*context.epoch()),
                         ))
                     }
