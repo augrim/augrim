@@ -47,3 +47,15 @@ impl Display for AlgorithmError {
         }
     }
 }
+
+impl From<InvalidStateError> for AlgorithmError {
+    fn from(err: InvalidStateError) -> Self {
+        AlgorithmError::InvalidState(err)
+    }
+}
+
+impl From<InternalError> for AlgorithmError {
+    fn from(err: InternalError) -> Self {
+        AlgorithmError::Internal(err)
+    }
+}
