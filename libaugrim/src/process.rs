@@ -21,4 +21,4 @@
 ///
 /// [^note]: For a full explanation of processes and the relation to other components, see Cachin,
 /// Guerraoui, and Rodrigues, Reliable and Secure Distributed Programming, 2nd ed., 2.1.1.
-pub trait Process: Copy + Eq + PartialEq {}
+pub trait Process: Clone + Eq + PartialEq {}
