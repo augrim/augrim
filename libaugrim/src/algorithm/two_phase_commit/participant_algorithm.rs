@@ -21,7 +21,6 @@ use crate::process::Process;
 use crate::time::TimeSource;
 
 use super::ParticipantAction;
-use super::ParticipantActionAlarm;
 use super::ParticipantActionNotification;
 use super::ParticipantContext;
 use super::ParticipantEvent;
@@ -129,10 +128,10 @@ where
                             vote: *vote,
                             decision_timeout_start: new_decision_timeout_start,
                         });
-                        actions.push(ParticipantAction::Update(
-                            new_context,
-                            ParticipantActionAlarm::Set(new_decision_timeout_end),
-                        ));
+                        actions.push(ParticipantAction::Update {
+                            context: new_context,
+                            alarm: Some(new_decision_timeout_end),
+                        });
                     }
 
                     Ok(actions)
@@ -188,10 +187,10 @@ where
 
                 // Update the context with the new state of WaitingForVote
                 context.set_state(ParticipantState::WaitingForVote);
-                actions.push(ParticipantAction::Update(
+                actions.push(ParticipantAction::Update {
                     context,
-                    ParticipantActionAlarm::Unset,
-                ));
+                    alarm: None,
+                });
 
                 // Send a RequestForVote notification
                 actions.push(ParticipantAction::Notify(
@@ -228,10 +227,10 @@ where
 
                 // The vote was no, so record our decision to Abort.
                 context.set_state(ParticipantState::Commit);
-                actions.push(ParticipantAction::Update(
-                    context.clone(),
-                    ParticipantActionAlarm::Unset,
-                ));
+                actions.push(ParticipantAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
 
                 Ok(actions)
             }
@@ -263,10 +262,10 @@ where
 
                 // The vote was no, so record our decision to Abort.
                 context.set_state(ParticipantState::Abort);
-                actions.push(ParticipantAction::Update(
-                    context.clone(),
-                    ParticipantActionAlarm::Unset,
-                ));
+                actions.push(ParticipantAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
 
                 Ok(actions)
             }
@@ -348,17 +347,17 @@ where
                         vote,
                         decision_timeout_start,
                     });
-                    actions.push(ParticipantAction::Update(
-                        context.clone(),
-                        ParticipantActionAlarm::Set(decision_timeout_end),
-                    ));
+                    actions.push(ParticipantAction::Update {
+                        context: context.clone(),
+                        alarm: Some(decision_timeout_end),
+                    });
                 } else {
                     // The vote was no, so record our decision to Abort.
                     context.set_state(ParticipantState::Abort);
-                    actions.push(ParticipantAction::Update(
-                        context.clone(),
-                        ParticipantActionAlarm::Unset,
-                    ));
+                    actions.push(ParticipantAction::Update {
+                        context: context.clone(),
+                        alarm: None,
+                    });
                 }
 
                 // Send the vote to the coordinator.

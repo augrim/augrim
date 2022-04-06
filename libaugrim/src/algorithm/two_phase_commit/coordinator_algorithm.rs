@@ -21,7 +21,6 @@ use crate::process::Process;
 use crate::time::TimeSource;
 
 use super::CoordinatorAction;
-use super::CoordinatorActionAlarm;
 use super::CoordinatorActionNotification;
 use super::CoordinatorContext;
 use super::CoordinatorEvent;
@@ -71,10 +70,10 @@ where
 
         // Add an action to update the state to abort and unset the alarm.
         context.set_state(CoordinatorState::Abort);
-        actions.push(CoordinatorAction::Update(
-            context.clone(),
-            CoordinatorActionAlarm::Unset,
-        ));
+        actions.push(CoordinatorAction::Update {
+            context: context.clone(),
+            alarm: None,
+        });
 
         // Send `Abort` to all participants which have voted yes.
         for participant in context
@@ -109,10 +108,10 @@ where
         context.set_last_commit_epoch(Some(*context.epoch()));
         context.set_epoch(context.epoch() + 1);
         context.set_state(CoordinatorState::WaitingForStart);
-        actions.push(CoordinatorAction::Update(
+        actions.push(CoordinatorAction::Update {
             context,
-            CoordinatorActionAlarm::Unset,
-        ));
+            alarm: None,
+        });
 
         // Notify that we need a new start value.
         actions.push(CoordinatorAction::Notify(
@@ -164,10 +163,10 @@ where
 
                 // Add an action to update the state to Voting and set the timeout alarm.
                 context.set_state(CoordinatorState::Voting { vote_timeout_start });
-                actions.push(CoordinatorAction::Update(
+                actions.push(CoordinatorAction::Update {
                     context,
-                    CoordinatorActionAlarm::Set(vote_timeout_end),
-                ));
+                    alarm: Some(vote_timeout_end),
+                });
 
                 Ok(actions)
             }
@@ -191,10 +190,10 @@ where
                 if vote {
                     // Add an action to update the state to commit and unset the alarm.
                     context.set_state(CoordinatorState::Commit);
-                    actions.push(CoordinatorAction::Update(
-                        context.clone(),
-                        CoordinatorActionAlarm::Unset,
-                    ));
+                    actions.push(CoordinatorAction::Update {
+                        context: context.clone(),
+                        alarm: None,
+                    });
 
                     // Send `Commit` to all participants.
                     for participant in context.participants() {
@@ -214,8 +213,8 @@ where
             }
 
             // An alarm may be sent if we've previously used the `CoordinatorAction::Update` action
-            // to set an alarm to `CoordinatorActionAlarm::Set`, as is the case when we enter the
-            // `Coordinator::Voting` state.
+            // to set an alarm to `Some(T)`, as is the case when we enter the `Coordinator::Voting`
+            // state.
             CoordinatorEvent::Alarm() => match context.state() {
                 // A vote timeout has occurred, which means we have not received votes within
                 // VOTE_TIMEOUT_SECONDS.
@@ -330,10 +329,10 @@ where
 
                 // Update the context to record the participant's vote
                 participant.vote = Some(vote);
-                actions.push(CoordinatorAction::Update(
-                    context.clone(),
-                    CoordinatorActionAlarm::Unset,
-                ));
+                actions.push(CoordinatorAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
 
                 // If all the participants have voted, then either decide to abort or change state.
                 if context.participants().iter().all(|p| p.vote.is_some()) {
@@ -345,10 +344,10 @@ where
                         // All participants voted yes, so we provide one last opportunity for the
                         // coordinator to vote no by waiting for the coordinators vote.
                         context.set_state(CoordinatorState::WaitingForVote);
-                        actions.push(CoordinatorAction::Update(
+                        actions.push(CoordinatorAction::Update {
                             context,
-                            CoordinatorActionAlarm::Unset,
-                        ));
+                            alarm: None,
+                        });
                         actions.push(CoordinatorAction::Notify(
                             // Notify that we are requesting a coordinator vote.
                             CoordinatorActionNotification::RequestForVote(),
