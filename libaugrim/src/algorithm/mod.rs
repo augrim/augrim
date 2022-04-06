@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::error::InternalError;
+use crate::error::AlgorithmError;
 use crate::process::Process;
 
 #[cfg(feature = "algorithm-two-phase-commit")]
@@ -34,5 +34,5 @@ where
         &self,
         event: Self::Event,
         context: Self::Context,
-    ) -> Result<Vec<Self::Action>, InternalError>;
+    ) -> Result<Vec<Self::Action>, AlgorithmError>;
 }
