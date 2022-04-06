@@ -19,14 +19,6 @@ use crate::time::Time;
 use super::ParticipantContext;
 use super::TwoPhaseCommitMessage;
 
-pub enum ParticipantActionAlarm<T>
-where
-    T: Time,
-{
-    Set(T),
-    Unset,
-}
-
 pub enum ParticipantAction<P, V, T>
 where
     P: Process,
@@ -35,7 +27,10 @@ where
 {
     Notify(ParticipantActionNotification<V>),
     SendMessage(P, TwoPhaseCommitMessage<V>),
-    Update(ParticipantContext<P, T>, ParticipantActionAlarm<T>),
+    Update {
+        context: ParticipantContext<P, T>,
+        alarm: Option<T>,
+    },
 }
 
 impl<P, V, T> Action for ParticipantAction<P, V, T>
