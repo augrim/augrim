@@ -226,7 +226,7 @@ where
                     Ok(actions)
                 }
 
-                // If we receive an alarm an the RequestforStart state, then we re-generate
+                // If we receive an alarm when in the RequestforStart state, then we re-generate
                 // a RequestForStart notification.
                 CoordinatorState::WaitingForStart => Ok(vec![CoordinatorAction::Notify(
                     CoordinatorActionNotification::RequestForStart(),
