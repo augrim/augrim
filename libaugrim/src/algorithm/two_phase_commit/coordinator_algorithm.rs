@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 use std::time::Duration;
 
 use crate::algorithm::{Algorithm, Value};
-use crate::error::AlgorithmError;
+use crate::error::{AlgorithmError, InvalidStateError};
 use crate::process::Process;
 use crate::time::TimeSource;
 
@@ -175,6 +175,16 @@ where
             // In response to a RequestForVote notification, a Vote event provides the answer to
             // whether we decide commit or abort.
             CoordinatorEvent::Vote(vote) => {
+                // If we receive a Vote event when not in WaitingForVote, it indicates
+                // a programming error by the caller of the algorithm.
+                if !matches!(context.state(), CoordinatorState::WaitingForVote) {
+                    return Err(AlgorithmError::InvalidState(
+                        InvalidStateError::with_message(
+                            "Vote event when not in WaitingForVote state".into(),
+                        ),
+                    ));
+                }
+
                 let mut actions = Vec::new();
 
                 // If vote is true, then we decide to commit; if vote is false, we decide to abort.
