@@ -39,8 +39,8 @@ where
     T: Time,
 {
     alarm: Option<T>,
-    epoch: Epoch,
     coordinator: P,
+    epoch: Epoch,
     last_commit_epoch: Option<Epoch>,
     participant_processes: Vec<P>,
     state: ParticipantState<T>,

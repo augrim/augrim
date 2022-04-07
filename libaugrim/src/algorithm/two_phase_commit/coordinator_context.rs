@@ -37,11 +37,11 @@ pub enum CoordinatorState<T>
 where
     T: Time,
 {
-    WaitingForStart,
-    Voting { vote_timeout_start: T },
-    WaitingForVote,
     Abort,
     Commit,
+    Voting { vote_timeout_start: T },
+    WaitingForStart,
+    WaitingForVote,
 }
 
 #[derive(Clone)]
@@ -52,10 +52,10 @@ where
 {
     alarm: Option<T>,
     coordinator: P,
-    participants: Vec<Participant<P>>,
-    state: CoordinatorState<T>,
     epoch: Epoch,
     last_commit_epoch: Option<Epoch>,
+    participants: Vec<Participant<P>>,
+    state: CoordinatorState<T>,
 }
 
 impl<P, T> CoordinatorContext<P, T>
