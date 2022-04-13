@@ -13,10 +13,11 @@
 // limitations under the License.
 
 use std::cmp::PartialOrd;
+use std::fmt::Debug;
 use std::ops::Add;
 use std::time::Duration;
 
-pub trait Time: Add<Duration, Output = Self> + PartialOrd + Copy {}
+pub trait Time: Add<Duration, Output = Self> + PartialOrd + Copy + Debug {}
 
 pub trait TimeSource {
     type Time: Time;
