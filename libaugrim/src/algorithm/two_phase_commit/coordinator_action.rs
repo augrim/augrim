@@ -17,6 +17,7 @@ use crate::process::Process;
 use crate::time::Time;
 
 use super::CoordinatorContext;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
 pub enum CoordinatorAction<P, V, T>
@@ -26,7 +27,7 @@ where
     T: Time,
 {
     Update {
-        context: CoordinatorContext<P, T>,
+        context: TwoPhaseCommitContext<P, T, CoordinatorContext<P, T>>,
         alarm: Option<T>,
     },
     SendMessage(P, TwoPhaseCommitMessage<V>),

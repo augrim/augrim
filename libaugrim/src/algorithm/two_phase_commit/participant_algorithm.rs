@@ -26,6 +26,7 @@ use super::ParticipantContext;
 use super::ParticipantEvent;
 use super::ParticipantMessage;
 use super::ParticipantState;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
 const DECISION_TIMEOUT_SECONDS: u64 = 30;
@@ -64,7 +65,7 @@ where
 {
     type Event = ParticipantEvent<P, V>;
     type Action = ParticipantAction<P, V, TS::Time>;
-    type Context = ParticipantContext<P, TS::Time>;
+    type Context = TwoPhaseCommitContext<P, TS::Time, ParticipantContext<P, TS::Time>>;
 
     fn event(
         &self,

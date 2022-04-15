@@ -15,8 +15,6 @@
 use crate::process::Process;
 use crate::time::Time;
 
-use super::Epoch;
-
 #[derive(Clone)]
 pub struct Participant<P> {
     pub process: P,
@@ -24,7 +22,7 @@ pub struct Participant<P> {
 }
 
 impl<P> Participant<P> {
-    fn new(process: P) -> Participant<P> {
+    pub fn new(process: P) -> Participant<P> {
         Participant {
             process,
             vote: None,
@@ -32,7 +30,7 @@ impl<P> Participant<P> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum CoordinatorState<T>
 where
     T: Time,
@@ -50,74 +48,6 @@ where
     P: Process,
     T: Time,
 {
-    alarm: Option<T>,
-    coordinator: P,
-    epoch: Epoch,
-    last_commit_epoch: Option<Epoch>,
-    participants: Vec<Participant<P>>,
-    state: CoordinatorState<T>,
-}
-
-impl<P, T> CoordinatorContext<P, T>
-where
-    P: Process,
-    T: Time,
-{
-    pub fn new(coordinator: P, participant_processes: Vec<P>) -> Self {
-        CoordinatorContext {
-            alarm: None,
-            coordinator,
-            participants: participant_processes
-                .into_iter()
-                .map(Participant::new)
-                .collect(),
-            state: CoordinatorState::WaitingForStart,
-            epoch: 0,
-            last_commit_epoch: None,
-        }
-    }
-
-    pub fn alarm(&self) -> &Option<T> {
-        &self.alarm
-    }
-
-    pub fn set_alarm(&mut self, alarm: Option<T>) {
-        self.alarm = alarm;
-    }
-
-    pub fn coordinator(&self) -> &P {
-        &self.coordinator
-    }
-
-    pub fn epoch(&self) -> &Epoch {
-        &self.epoch
-    }
-
-    pub fn set_epoch(&mut self, epoch: Epoch) {
-        self.epoch = epoch
-    }
-
-    pub fn last_commit_epoch(&self) -> &Option<Epoch> {
-        &self.last_commit_epoch
-    }
-
-    pub fn set_last_commit_epoch(&mut self, epoch: Option<Epoch>) {
-        self.last_commit_epoch = epoch
-    }
-
-    pub fn participants(&self) -> &Vec<Participant<P>> {
-        &self.participants
-    }
-
-    pub fn participants_mut(&mut self) -> &mut Vec<Participant<P>> {
-        &mut self.participants
-    }
-
-    pub fn state(&self) -> &CoordinatorState<T> {
-        &self.state
-    }
-
-    pub fn set_state(&mut self, state: CoordinatorState<T>) {
-        self.state = state;
-    }
+    pub(super) participants: Vec<Participant<P>>,
+    pub(super) state: CoordinatorState<T>,
 }

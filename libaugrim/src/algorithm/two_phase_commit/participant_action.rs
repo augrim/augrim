@@ -17,6 +17,7 @@ use crate::process::Process;
 use crate::time::Time;
 
 use super::ParticipantContext;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
 pub enum ParticipantAction<P, V, T>
@@ -28,7 +29,7 @@ where
     Notify(ParticipantActionNotification<V>),
     SendMessage(P, TwoPhaseCommitMessage<V>),
     Update {
-        context: ParticipantContext<P, T>,
+        context: TwoPhaseCommitContext<P, T, ParticipantContext<P, T>>,
         alarm: Option<T>,
     },
 }
