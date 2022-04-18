@@ -13,9 +13,11 @@
 // limitations under the License.
 
 use crate::algorithm::Value;
+use crate::error::InvalidStateError;
 use crate::process::Process;
 
 use super::ParticipantMessage;
+use super::TwoPhaseCommitEvent;
 
 pub enum ParticipantEvent<P, V>
 where
@@ -25,4 +27,23 @@ where
     Alarm(),
     Deliver(P, ParticipantMessage<V>),
     Vote(bool),
+}
+
+impl<P, V> TryFrom<TwoPhaseCommitEvent<P, V>> for ParticipantEvent<P, V>
+where
+    P: Process,
+    V: Value,
+{
+    type Error = InvalidStateError;
+
+    fn try_from(event: TwoPhaseCommitEvent<P, V>) -> Result<Self, Self::Error> {
+        match event {
+            TwoPhaseCommitEvent::Alarm() => Ok(ParticipantEvent::Alarm()),
+            TwoPhaseCommitEvent::Deliver(p, m) => Ok(ParticipantEvent::Deliver(p, m.try_into()?)),
+            TwoPhaseCommitEvent::Start(_) => Err(InvalidStateError::with_message(
+                "Start event can not be handled by a participant".into(),
+            )),
+            TwoPhaseCommitEvent::Vote(vote) => Ok(ParticipantEvent::Vote(vote)),
+        }
+    }
 }

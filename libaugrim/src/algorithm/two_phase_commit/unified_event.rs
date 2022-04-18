@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::algorithm::Value;
 use crate::process::Process;
-use crate::time::Time;
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum ParticipantState<T>
-where
-    T: Time,
-{
-    Abort,
-    Commit,
-    Voted {
-        vote: bool,
-        decision_timeout_start: T,
-    },
-    WaitingForVoteRequest,
-    WaitingForVote,
-}
+use super::TwoPhaseCommitMessage;
 
-#[derive(Clone)]
-pub struct ParticipantContext<P, T>
+pub enum TwoPhaseCommitEvent<P, V>
 where
     P: Process,
-    T: Time,
+    V: Value,
 {
-    pub(super) participant_processes: Vec<P>,
-    pub(super) state: ParticipantState<T>,
+    Alarm(),
+    Deliver(P, TwoPhaseCommitMessage<V>),
+    Start(V),
+    Vote(bool),
 }

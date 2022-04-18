@@ -26,6 +26,7 @@ use super::CoordinatorContext;
 use super::CoordinatorEvent;
 use super::CoordinatorMessage;
 use super::CoordinatorState;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
 const VOTE_TIMEOUT_SECONDS: u64 = 30;
@@ -62,7 +63,7 @@ where
     // - When all participants have voted but at least one voted NO
     fn push_abort_actions(
         &self,
-        mut context: CoordinatorContext<P, TS::Time>,
+        mut context: TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>,
         actions: &mut Vec<CoordinatorAction<P, V, TS::Time>>,
     ) {
         // The order of actions here is important! We must update our state to `Abort` before we
@@ -100,7 +101,7 @@ where
     // a decision has been reached, either abort or commit.
     fn push_advance_epoch_actions(
         &self,
-        mut context: CoordinatorContext<P, TS::Time>,
+        mut context: TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>,
         actions: &mut Vec<CoordinatorAction<P, V, TS::Time>>,
     ) {
         // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
@@ -128,7 +129,7 @@ where
 {
     type Event = CoordinatorEvent<P, V>;
     type Action = CoordinatorAction<P, V, TS::Time>;
-    type Context = CoordinatorContext<P, TS::Time>;
+    type Context = TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>;
 
     fn event(
         &self,

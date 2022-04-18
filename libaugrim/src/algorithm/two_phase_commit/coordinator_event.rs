@@ -13,9 +13,11 @@
 // limitations under the License.
 
 use crate::algorithm::Value;
+use crate::error::InvalidStateError;
 use crate::process::Process;
 
 use super::CoordinatorMessage;
+use super::TwoPhaseCommitEvent;
 
 pub enum CoordinatorEvent<P, V>
 where
@@ -26,4 +28,21 @@ where
     Deliver(P, CoordinatorMessage),
     Start(V),
     Vote(bool),
+}
+
+impl<P, V> TryFrom<TwoPhaseCommitEvent<P, V>> for CoordinatorEvent<P, V>
+where
+    P: Process,
+    V: Value,
+{
+    type Error = InvalidStateError;
+
+    fn try_from(event: TwoPhaseCommitEvent<P, V>) -> Result<Self, Self::Error> {
+        Ok(match event {
+            TwoPhaseCommitEvent::Alarm() => CoordinatorEvent::Alarm(),
+            TwoPhaseCommitEvent::Deliver(p, m) => CoordinatorEvent::Deliver(p, m.try_into()?),
+            TwoPhaseCommitEvent::Start(value) => CoordinatorEvent::Start(value),
+            TwoPhaseCommitEvent::Vote(vote) => CoordinatorEvent::Vote(vote),
+        })
+    }
 }

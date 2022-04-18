@@ -17,7 +17,9 @@ use crate::process::Process;
 use crate::time::Time;
 
 use super::CoordinatorContext;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
+use super::{TwoPhaseCommitAction, TwoPhaseCommitActionNotification};
 
 pub enum CoordinatorAction<P, V, T>
 where
@@ -26,7 +28,7 @@ where
     T: Time,
 {
     Update {
-        context: CoordinatorContext<P, T>,
+        context: TwoPhaseCommitContext<P, T, CoordinatorContext<P, T>>,
         alarm: Option<T>,
     },
     SendMessage(P, TwoPhaseCommitMessage<V>),
@@ -47,4 +49,43 @@ pub enum CoordinatorActionNotification {
     Commit(),
     Abort(),
     MessageDropped(String),
+}
+
+impl<P, V, T> From<CoordinatorAction<P, V, T>> for TwoPhaseCommitAction<P, V, T>
+where
+    P: Process,
+    V: Value,
+    T: Time,
+{
+    fn from(action: CoordinatorAction<P, V, T>) -> Self {
+        match action {
+            CoordinatorAction::Update { context, alarm } => TwoPhaseCommitAction::Update {
+                context: context.into(),
+                alarm,
+            },
+            CoordinatorAction::SendMessage(p, m) => TwoPhaseCommitAction::SendMessage(p, m),
+            CoordinatorAction::Notify(n) => TwoPhaseCommitAction::Notify(n.into()),
+        }
+    }
+}
+
+impl<V> From<CoordinatorActionNotification> for TwoPhaseCommitActionNotification<V>
+where
+    V: Value,
+{
+    fn from(notification: CoordinatorActionNotification) -> Self {
+        match notification {
+            CoordinatorActionNotification::Abort() => TwoPhaseCommitActionNotification::Abort(),
+            CoordinatorActionNotification::Commit() => TwoPhaseCommitActionNotification::Commit(),
+            CoordinatorActionNotification::MessageDropped(s) => {
+                TwoPhaseCommitActionNotification::MessageDropped(s)
+            }
+            CoordinatorActionNotification::RequestForStart() => {
+                TwoPhaseCommitActionNotification::RequestForStart()
+            }
+            CoordinatorActionNotification::RequestForVote() => {
+                TwoPhaseCommitActionNotification::CoordinatorRequestForVote()
+            }
+        }
+    }
 }

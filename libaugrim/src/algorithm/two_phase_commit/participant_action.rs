@@ -17,7 +17,9 @@ use crate::process::Process;
 use crate::time::Time;
 
 use super::ParticipantContext;
+use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
+use super::{TwoPhaseCommitAction, TwoPhaseCommitActionNotification};
 
 pub enum ParticipantAction<P, V, T>
 where
@@ -28,7 +30,7 @@ where
     Notify(ParticipantActionNotification<V>),
     SendMessage(P, TwoPhaseCommitMessage<V>),
     Update {
-        context: ParticipantContext<P, T>,
+        context: TwoPhaseCommitContext<P, T, ParticipantContext<P, T>>,
         alarm: Option<T>,
     },
 }
@@ -46,4 +48,40 @@ pub enum ParticipantActionNotification<V> {
     Commit(),
     MessageDropped(String),
     RequestForVote(V),
+}
+
+impl<P, V, T> From<ParticipantAction<P, V, T>> for TwoPhaseCommitAction<P, V, T>
+where
+    P: Process,
+    V: Value,
+    T: Time,
+{
+    fn from(action: ParticipantAction<P, V, T>) -> Self {
+        match action {
+            ParticipantAction::Update { context, alarm } => TwoPhaseCommitAction::Update {
+                context: context.into(),
+                alarm,
+            },
+            ParticipantAction::SendMessage(p, m) => TwoPhaseCommitAction::SendMessage(p, m),
+            ParticipantAction::Notify(n) => TwoPhaseCommitAction::Notify(n.into()),
+        }
+    }
+}
+
+impl<V> From<ParticipantActionNotification<V>> for TwoPhaseCommitActionNotification<V>
+where
+    V: Value,
+{
+    fn from(notification: ParticipantActionNotification<V>) -> Self {
+        match notification {
+            ParticipantActionNotification::Abort() => TwoPhaseCommitActionNotification::Abort(),
+            ParticipantActionNotification::Commit() => TwoPhaseCommitActionNotification::Commit(),
+            ParticipantActionNotification::MessageDropped(s) => {
+                TwoPhaseCommitActionNotification::MessageDropped(s)
+            }
+            ParticipantActionNotification::RequestForVote(v) => {
+                TwoPhaseCommitActionNotification::ParticipantRequestForVote(v)
+            }
+        }
+    }
 }

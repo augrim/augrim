@@ -17,7 +17,7 @@
 use std::convert::TryFrom;
 
 use crate::algorithm::Value;
-use crate::error::InternalError;
+use crate::error::InvalidStateError;
 
 use super::Epoch;
 use super::TwoPhaseCommitMessage;
@@ -52,7 +52,7 @@ impl<V> TryFrom<TwoPhaseCommitMessage<V>> for CoordinatorMessage
 where
     V: Value,
 {
-    type Error = InternalError;
+    type Error = InvalidStateError;
 
     fn try_from(message: TwoPhaseCommitMessage<V>) -> Result<Self, Self::Error> {
         match message {
@@ -62,13 +62,13 @@ where
             TwoPhaseCommitMessage::DecisionRequest(epoch) => {
                 Ok(CoordinatorMessage::DecisionRequest(epoch))
             }
-            TwoPhaseCommitMessage::VoteRequest(_, _) => Err(InternalError::with_message(
+            TwoPhaseCommitMessage::VoteRequest(_, _) => Err(InvalidStateError::with_message(
                 "VoteRequest message cannot be handled by a coordinator".into(),
             )),
-            TwoPhaseCommitMessage::Commit(_) => Err(InternalError::with_message(
+            TwoPhaseCommitMessage::Commit(_) => Err(InvalidStateError::with_message(
                 "Commit message cannot be handled by a coordinator".into(),
             )),
-            TwoPhaseCommitMessage::Abort(_) => Err(InternalError::with_message(
+            TwoPhaseCommitMessage::Abort(_) => Err(InvalidStateError::with_message(
                 "Abort message cannot be handled by a coordinator".into(),
             )),
         }
