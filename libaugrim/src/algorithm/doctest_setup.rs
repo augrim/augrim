@@ -19,11 +19,11 @@ struct ExampleContext(u32);
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct ExampleProcess;
 
-impl augrim::process::Process for ExampleProcess {}
+impl augrim::Process for ExampleProcess {}
 
 struct ExampleAlgorithm;
 
-impl augrim::algorithm::Algorithm<ExampleProcess> for ExampleAlgorithm {
+impl augrim::Algorithm<ExampleProcess> for ExampleAlgorithm {
     type Event = ExampleEvent;
     type Action = ExampleAction;
     type Context = ExampleContext;

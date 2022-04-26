@@ -50,14 +50,14 @@ where
     /// Suppose we have a very simple counting algorithm:
     ///
     /// ```no_run
-    /// use augrim::algorithm::Algorithm;
+    /// use augrim::Algorithm;
     ///
     /// struct ExampleEvent(Option<u32>);
     /// struct ExampleAction(Option<u32>);
     /// struct ExampleContext(u32);
     /// # #[derive(Debug, Eq, PartialEq, Clone)]
     /// # struct ExampleProcess;
-    /// # impl augrim::process::Process for ExampleProcess {}
+    /// # impl augrim::Process for ExampleProcess {}
     ///
     /// struct ExampleAlgorithm;
     ///
@@ -92,7 +92,7 @@ where
     /// We can see it used as follows:
     ///
     /// ```
-    /// use augrim::algorithm::Algorithm;
+    /// use augrim::Algorithm;
     ///
     /// # include!("./doctest_setup.rs");
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
