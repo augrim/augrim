@@ -20,9 +20,6 @@ use std::marker::PhantomData;
 use crate::error::{AlgorithmError, InternalError};
 use crate::process::Process;
 
-#[cfg(feature = "algorithm-two-phase-commit")]
-pub mod two_phase_commit;
-
 pub trait Action {}
 pub trait Context {}
 pub trait Value: Clone {}

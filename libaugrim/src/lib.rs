@@ -24,3 +24,5 @@ pub mod message;
 pub mod process;
 #[cfg(feature = "time")]
 pub mod time;
+#[cfg(feature = "algorithm-two-phase-commit")]
+pub mod two_phase_commit;
