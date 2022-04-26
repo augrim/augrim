@@ -23,11 +23,31 @@ use crate::error::{AlgorithmError, InternalError};
 
 pub trait Value: Clone {}
 
+/// A consensus algorithm.
+///
+/// An algorithm processes events with a given context, producing a set of actions.
+///
+/// Events are inputs into the algorithm. For example, if a message is received from another
+/// process, it is input into the algorithm as an event (likely a message delivery event).
+///
+/// Actions are the outputs of the algorithm. For example, the algorithm may output an action to
+/// update the context and another action to send a message to another process.
+///
+/// The context of the algorithm contains the state of the algorithm which must be remembered
+/// between events. For example, if an algorithm must keep track of how other processes have voted,
+/// it will be stored in the context. A context is passed in with an event and updated using an
+/// action.
 pub trait Algorithm {
+    /// The event type representing all valid events for the algorithm.
     type Event;
+
+    /// The action type representing all valid actions returned by the algorithm.
     type Action;
+
+    /// The context type representing all algorithm-specific state which must be stored.
     type Context;
 
+    /// Process an event with a given context, producing a list of actions.
     fn event(
         &self,
         event: Self::Event,
