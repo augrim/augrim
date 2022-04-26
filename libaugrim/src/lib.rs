@@ -18,8 +18,6 @@ extern crate log;
 #[cfg(feature = "algorithm")]
 mod algorithm;
 pub mod error;
-#[cfg(feature = "links")]
-pub mod links;
 mod message;
 mod process;
 #[cfg(feature = "time")]
