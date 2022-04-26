@@ -15,7 +15,7 @@
 use crate::process::Process;
 use crate::time::Time;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Participant<P> {
     pub process: P,
     pub vote: Option<bool>,
@@ -42,7 +42,7 @@ where
     WaitingForVote,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CoordinatorContext<P, T>
 where
     P: Process,

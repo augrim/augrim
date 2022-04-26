@@ -22,7 +22,7 @@ use super::TwoPhaseCommitState;
 use super::{CoordinatorContext, CoordinatorState, Participant};
 use super::{ParticipantContext, ParticipantState};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TwoPhaseCommitContext<P, T, R = TwoPhaseCommitRoleContext<P, T>>
 where
     P: Process,

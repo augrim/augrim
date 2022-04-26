@@ -17,7 +17,7 @@ use crate::message::Message;
 
 use super::Epoch;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TwoPhaseCommitMessage<V>
 where
     V: Value,

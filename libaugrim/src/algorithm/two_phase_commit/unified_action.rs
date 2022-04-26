@@ -19,6 +19,7 @@ use crate::time::Time;
 use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
+#[derive(Debug, PartialEq)]
 pub enum TwoPhaseCommitAction<P, V, T>
 where
     P: Process,
@@ -41,6 +42,7 @@ where
 {
 }
 
+#[derive(Debug, PartialEq)]
 pub enum TwoPhaseCommitActionNotification<V>
 where
     V: Value,

@@ -30,7 +30,7 @@ where
     WaitingForVote,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ParticipantContext<P, T>
 where
     P: Process,
