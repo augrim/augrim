@@ -20,7 +20,7 @@ use super::ParticipantContext;
 use super::TwoPhaseCommitState;
 use super::{CoordinatorContext, Participant};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 enum InnerContext<P, T>
 where
     P: Process,
@@ -30,7 +30,7 @@ where
     Participant(ParticipantContext<P, T>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TwoPhaseCommitRoleContext<P, T>
 where
     P: Process,
