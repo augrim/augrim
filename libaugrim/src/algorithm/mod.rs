@@ -20,14 +20,10 @@ use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 use crate::error::{AlgorithmError, InternalError};
-use crate::process::Process;
 
 pub trait Value: Clone {}
 
-pub trait Algorithm<P>
-where
-    P: Process,
-{
+pub trait Algorithm {
     type Event;
     type Action;
     type Context;
@@ -56,12 +52,10 @@ where
     /// struct ExampleAction(Option<u32>);
     /// struct ExampleContext(u32);
     /// # #[derive(Debug, Eq, PartialEq, Clone)]
-    /// # struct ExampleProcess;
-    /// # impl augrim::Process for ExampleProcess {}
     ///
     /// struct ExampleAlgorithm;
     ///
-    /// impl Algorithm<ExampleProcess> for ExampleAlgorithm {
+    /// impl Algorithm for ExampleAlgorithm {
     ///     type Event = ExampleEvent;
     ///     type Action = ExampleAction;
     ///     type Context = ExampleContext;
@@ -86,7 +80,7 @@ where
     /// would be an algorithm with the following types:
     ///
     /// ```ignore
-    /// impl Algorithm<P, Event=Option<&'_ str>, Context=&'_ str, Action=Option<String>>
+    /// impl Algorithm<Event=Option<&'_ str>, Context=&'_ str, Action=Option<String>>
     /// ```
     ///
     /// We can see it used as follows:
@@ -108,7 +102,7 @@ where
     /// # }
     ///
     /// ```
-    fn into_algorithm<E, A, C>(self) -> IntoAlgorithm<Self, P, E, A, C>
+    fn into_algorithm<E, A, C>(self) -> IntoAlgorithm<Self, E, A, C>
     where
         Self: Sized,
         Self::Event: TryFrom<E, Error = InternalError>,
@@ -117,7 +111,6 @@ where
     {
         IntoAlgorithm {
             inner: self,
-            _process: PhantomData,
             _event: PhantomData,
             _action: PhantomData,
             _context: PhantomData,
@@ -125,21 +118,19 @@ where
     }
 }
 
-pub struct IntoAlgorithm<T, P, E, A, C> {
+pub struct IntoAlgorithm<T, E, A, C> {
     inner: T,
-    _process: PhantomData<P>,
     _event: PhantomData<E>,
     _action: PhantomData<A>,
     _context: PhantomData<C>,
 }
 
-impl<T, P, E, A, C> Algorithm<P> for IntoAlgorithm<T, P, E, A, C>
+impl<T, E, A, C> Algorithm for IntoAlgorithm<T, E, A, C>
 where
-    P: Process,
-    T: Algorithm<P>,
-    <T as Algorithm<P>>::Event: TryFrom<E, Error = InternalError>,
-    A: TryFrom<<T as Algorithm<P>>::Action, Error = InternalError>,
-    <T as Algorithm<P>>::Context: TryFrom<C, Error = InternalError>,
+    T: Algorithm,
+    <T as Algorithm>::Event: TryFrom<E, Error = InternalError>,
+    A: TryFrom<<T as Algorithm>::Action, Error = InternalError>,
+    <T as Algorithm>::Context: TryFrom<C, Error = InternalError>,
 {
     type Event = E;
     type Action = A;
@@ -205,11 +196,9 @@ mod tests {
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct TestProcess;
 
-    impl Process for TestProcess {}
-
     struct TestAlgorithm;
 
-    impl Algorithm<TestProcess> for TestAlgorithm {
+    impl Algorithm for TestAlgorithm {
         type Event = TestEvent;
         type Action = TestAction;
         type Context = TestContext;

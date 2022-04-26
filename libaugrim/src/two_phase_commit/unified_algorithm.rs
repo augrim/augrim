@@ -47,7 +47,7 @@ where
     }
 }
 
-impl<P, V, TS> Algorithm<P> for TwoPhaseCommitAlgorithm<P, V, TS>
+impl<P, V, TS> Algorithm for TwoPhaseCommitAlgorithm<P, V, TS>
 where
     P: Process,
     V: Value,

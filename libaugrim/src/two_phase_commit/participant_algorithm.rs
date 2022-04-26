@@ -57,7 +57,7 @@ where
     }
 }
 
-impl<P, V, TS> Algorithm<P> for ParticipantAlgorithm<P, V, TS>
+impl<P, V, TS> Algorithm for ParticipantAlgorithm<P, V, TS>
 where
     P: Process,
     V: Value,
