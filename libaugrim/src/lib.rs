@@ -28,7 +28,7 @@ mod time;
 pub mod two_phase_commit;
 
 #[cfg(feature = "algorithm")]
-pub use algorithm::{Action, Algorithm, Context, IntoAlgorithm, Value};
+pub use algorithm::{Algorithm, Context, IntoAlgorithm, Value};
 pub use message::Message;
 pub use process::Process;
 #[cfg(feature = "time")]

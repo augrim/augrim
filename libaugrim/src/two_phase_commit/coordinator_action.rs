@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::algorithm::{Action, Value};
+use crate::algorithm::Value;
 use crate::process::Process;
 use crate::time::Time;
 
@@ -33,14 +33,6 @@ where
     },
     SendMessage(P, TwoPhaseCommitMessage<V>),
     Notify(CoordinatorActionNotification),
-}
-
-impl<P, V, T> Action for CoordinatorAction<P, V, T>
-where
-    P: Process,
-    V: Value,
-    T: Time,
-{
 }
 
 pub enum CoordinatorActionNotification {
