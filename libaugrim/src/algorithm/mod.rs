@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Consensus algorithm trait and implementations.
+
 use std::convert::TryFrom;
 use std::marker::PhantomData;
 
