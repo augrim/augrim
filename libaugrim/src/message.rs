@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Message trait
+//! A trait for messages sent between processes.
 
 /// A message sent between processes as part of a consensus algorithm.
 ///

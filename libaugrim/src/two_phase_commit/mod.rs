@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! An implementation of the 2PC (Two-Phase Commit) consensus algorithm.
+
 mod coordinator_action;
 mod coordinator_algorithm;
 mod coordinator_context;

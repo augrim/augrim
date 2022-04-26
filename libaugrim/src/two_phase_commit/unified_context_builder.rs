@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::algorithm::two_phase_commit::Epoch;
 use crate::error::InvalidStateError;
 use crate::process::Process;
 use crate::time::Time;
 
+use super::Epoch;
 use super::Participant;
 use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitRoleContext;
@@ -151,7 +151,7 @@ where
 mod tests {
     use std::time::SystemTime;
 
-    use crate::algorithm::two_phase_commit::{CoordinatorContext, CoordinatorState};
+    use crate::two_phase_commit::{CoordinatorContext, CoordinatorState};
 
     use super::*;
 

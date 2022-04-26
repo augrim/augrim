@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::algorithm::two_phase_commit::Epoch;
 use crate::error::InvalidStateError;
 use crate::process::Process;
 use crate::time::Time;
 
+use super::Epoch;
 use super::TwoPhaseCommitRoleContext;
 use super::TwoPhaseCommitState;
 use super::{CoordinatorContext, CoordinatorState, Participant};

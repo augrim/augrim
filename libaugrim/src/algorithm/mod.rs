@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Consensus algorithm trait and implementations.
+
 use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 use crate::error::{AlgorithmError, InternalError};
 use crate::process::Process;
-
-#[cfg(feature = "algorithm-two-phase-commit")]
-pub mod two_phase_commit;
 
 pub trait Action {}
 pub trait Context {}
@@ -51,14 +50,14 @@ where
     /// Suppose we have a very simple counting algorithm:
     ///
     /// ```no_run
-    /// use augrim::algorithm::Algorithm;
+    /// use augrim::Algorithm;
     ///
     /// struct ExampleEvent(Option<u32>);
     /// struct ExampleAction(Option<u32>);
     /// struct ExampleContext(u32);
     /// # #[derive(Debug, Eq, PartialEq, Clone)]
     /// # struct ExampleProcess;
-    /// # impl augrim::process::Process for ExampleProcess {}
+    /// # impl augrim::Process for ExampleProcess {}
     ///
     /// struct ExampleAlgorithm;
     ///
@@ -93,7 +92,7 @@ where
     /// We can see it used as follows:
     ///
     /// ```
-    /// use augrim::algorithm::Algorithm;
+    /// use augrim::Algorithm;
     ///
     /// # include!("./doctest_setup.rs");
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {

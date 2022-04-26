@@ -16,11 +16,20 @@
 extern crate log;
 
 #[cfg(feature = "algorithm")]
-pub mod algorithm;
+mod algorithm;
 pub mod error;
 #[cfg(feature = "links")]
 pub mod links;
-pub mod message;
-pub mod process;
+mod message;
+mod process;
 #[cfg(feature = "time")]
-pub mod time;
+mod time;
+#[cfg(feature = "algorithm-two-phase-commit")]
+pub mod two_phase_commit;
+
+#[cfg(feature = "algorithm")]
+pub use algorithm::{Action, Algorithm, Context, IntoAlgorithm, Value};
+pub use message::Message;
+pub use process::Process;
+#[cfg(feature = "time")]
+pub use time::{SystemTimeFactory, Time, TimeSource};
