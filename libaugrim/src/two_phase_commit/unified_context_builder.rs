@@ -155,8 +155,6 @@ mod tests {
 
     use super::*;
 
-    impl Process for String {}
-
     #[test]
     fn build_coordinator_context() {
         let now = SystemTime::now();
