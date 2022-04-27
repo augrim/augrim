@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::algorithm::{Action, Value};
+use crate::algorithm::Value;
 use crate::process::Process;
 use crate::time::Time;
 
@@ -32,14 +32,6 @@ where
     },
     SendMessage(P, TwoPhaseCommitMessage<V>),
     Notify(TwoPhaseCommitActionNotification<V>),
-}
-
-impl<P, V, T> Action for TwoPhaseCommitAction<P, V, T>
-where
-    P: Process,
-    V: Value,
-    T: Time,
-{
 }
 
 #[derive(Debug, PartialEq)]

@@ -20,8 +20,6 @@ use std::marker::PhantomData;
 use crate::error::{AlgorithmError, InternalError};
 use crate::process::Process;
 
-pub trait Action {}
-pub trait Context {}
 pub trait Value: Clone {}
 
 pub trait Algorithm<P>

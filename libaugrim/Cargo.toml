@@ -36,11 +36,9 @@ experimental = [
     # The following features are experimental:
     "algorithm",
     "algorithm-two-phase-commit",
-    "links",
     "time",
 ]
 
 algorithm = []
 algorithm-two-phase-commit = ["algorithm", "time"]
-links = []
 time = []
