@@ -14,7 +14,7 @@
 
 //! A trait for messages sent between processes.
 
-/// A message sent between processes as part of a consensus algorithm.
+/// A message sent between processes.
 ///
 /// [`Message`]s are sent across a network which connects the processes together[^note].
 ///
