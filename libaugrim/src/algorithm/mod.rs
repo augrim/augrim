@@ -21,6 +21,7 @@ use std::marker::PhantomData;
 
 use crate::error::{AlgorithmError, InternalError};
 
+/// A value to be agreed upon between processes.
 pub trait Value: Clone {}
 
 /// A consensus algorithm.
