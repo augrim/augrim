@@ -139,6 +139,9 @@ pub trait Algorithm {
     }
 }
 
+/// An algorithm that wraps an algorithm of another type.
+///
+/// This `struct` is returned by the [`Algorithm::into_algorithm`] method.
 pub struct IntoAlgorithm<T, E, A, C> {
     inner: T,
     _event: PhantomData<E>,
