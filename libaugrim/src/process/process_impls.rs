@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! A trait for processes which are participating in consensus.
+//! Implements the Process trait on various primitive values.
 
-/// An identifier for an entity participating in consensus.
-///
-/// Multiple distributed processes coordinate to execute a consensus algorithm by sending messages
-/// across a network that connects processes together[^note].
-///
-/// [^note]: For a full explanation of processes and the relation to other components, see Cachin,
-/// Guerraoui, and Rodrigues, Reliable and Secure Distributed Programming, 2nd ed., 2.1.1.
-pub trait Process: Clone + Eq + PartialEq {}
+macro_rules! impl_process {
+    ($($target:path),* $(,)?) => {
+        $(impl crate::process::Process for $target {})*
+    }
+}
+
+impl_process!(u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, String);

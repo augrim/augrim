@@ -14,6 +14,8 @@
 
 //! Consensus algorithm trait and implementations.
 
+mod value_impls;
+
 use std::convert::TryFrom;
 use std::marker::PhantomData;
 
