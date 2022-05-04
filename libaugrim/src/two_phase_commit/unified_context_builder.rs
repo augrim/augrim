@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::marker::PhantomData;
+
 use crate::error::InvalidStateError;
 use crate::process::Process;
 use crate::time::Time;
@@ -28,7 +30,6 @@ where
     P: Process,
     T: Time,
 {
-    alarm: Option<T>,
     coordinator: Option<P>,
     epoch: Option<Epoch>,
     last_commit_epoch: Option<Epoch>,
@@ -36,6 +37,7 @@ where
     participant_processes: Option<Vec<P>>,
     state: Option<TwoPhaseCommitState<T>>,
     this_process: Option<P>,
+    time_phantom: PhantomData<T>,
 }
 
 impl<P, T> TwoPhaseCommitContextBuilder<P, T>
@@ -45,7 +47,6 @@ where
 {
     pub fn new() -> Self {
         Self {
-            alarm: None,
             coordinator: None,
             epoch: None,
             last_commit_epoch: None,
@@ -53,12 +54,8 @@ where
             participant_processes: None,
             state: None,
             this_process: None,
+            time_phantom: PhantomData,
         }
-    }
-
-    pub fn with_alarm(mut self, alarm: T) -> Self {
-        self.alarm = Some(alarm);
-        self
     }
 
     pub fn with_coordinator(mut self, coordinator: P) -> Self {
@@ -100,7 +97,6 @@ where
         self,
     ) -> Result<TwoPhaseCommitContext<P, T, TwoPhaseCommitRoleContext<P, T>>, InvalidStateError>
     {
-        let alarm = self.alarm;
         let last_commit_epoch = self.last_commit_epoch;
 
         let coordinator = self
@@ -137,12 +133,12 @@ where
         }?;
 
         Ok(TwoPhaseCommitContext {
-            alarm,
             coordinator,
             epoch,
             last_commit_epoch,
             role_context,
             this_process,
+            time_phantom: self.time_phantom,
         })
     }
 }
@@ -157,10 +153,7 @@ mod tests {
 
     #[test]
     fn build_coordinator_context() {
-        let now = SystemTime::now();
-
         let unified_context = TwoPhaseCommitContextBuilder::<String, SystemTime>::new()
-            .with_alarm(now)
             .with_coordinator("me".into())
             .with_epoch(2)
             .with_last_commit_epoch(1)
@@ -177,7 +170,6 @@ mod tests {
         let coordinator_context: TwoPhaseCommitContext<_, _, CoordinatorContext<_, _>> =
             unified_context.try_into().unwrap();
 
-        assert_eq!(coordinator_context.alarm().unwrap(), now);
         assert_eq!(*coordinator_context.coordinator(), "me".to_string());
         assert_eq!(*coordinator_context.epoch(), 2);
         assert_eq!(coordinator_context.last_commit_epoch().unwrap(), 1);
@@ -189,7 +181,6 @@ mod tests {
 
         let reunified_context: TwoPhaseCommitContext<_, _> = coordinator_context.into();
 
-        assert_eq!(reunified_context.alarm().unwrap(), now);
         assert_eq!(*reunified_context.coordinator(), "me".to_string());
         assert_eq!(*reunified_context.epoch(), 2);
         assert_eq!(reunified_context.last_commit_epoch().unwrap(), 1);
