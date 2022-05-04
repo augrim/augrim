@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Contains ParticipantMessage, a message which is delivered to the coordinator.
+//! Contains ParticipantMessage, a message which is delivered to the participant.
 
 use std::convert::TryFrom;
 
@@ -22,10 +22,10 @@ use crate::error::InvalidStateError;
 use super::Epoch;
 use super::TwoPhaseCommitMessage;
 
-/// A message which is delivered to the coordinator.
+/// A message which is delivered to the participant.
 ///
 /// This is a subset of `TwoPhaseCommitMessage`, containing only the set of messages which can be
-/// delivered to a coordinator.
+/// delivered to a participant.
 #[derive(Clone)]
 pub enum ParticipantMessage<V>
 where
