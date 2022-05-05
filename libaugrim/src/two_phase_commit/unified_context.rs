@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::marker::PhantomData;
+
 use crate::error::InvalidStateError;
 use crate::process::Process;
 use crate::time::Time;
@@ -29,12 +31,12 @@ where
     T: Time,
     R: Clone,
 {
-    pub(super) alarm: Option<T>,
     pub(super) coordinator: P,
     pub(super) epoch: Epoch,
     pub(super) last_commit_epoch: Option<Epoch>,
     pub(super) role_context: R,
     pub(super) this_process: P,
+    pub(super) time_phantom: PhantomData<T>,
 }
 
 impl<P, T, R> TwoPhaseCommitContext<P, T, R>
@@ -43,14 +45,6 @@ where
     T: Time,
     R: Clone,
 {
-    pub fn alarm(&self) -> &Option<T> {
-        &self.alarm
-    }
-
-    pub fn set_alarm(&mut self, alarm: Option<T>) {
-        self.alarm = alarm;
-    }
-
     pub fn coordinator(&self) -> &P {
         &self.coordinator
     }
@@ -147,12 +141,12 @@ where
         context: TwoPhaseCommitContext<P, T, TwoPhaseCommitRoleContext<P, T>>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            alarm: context.alarm,
             coordinator: context.coordinator,
             epoch: context.epoch,
             last_commit_epoch: context.last_commit_epoch,
             role_context: context.role_context.try_into()?,
             this_process: context.this_process,
+            time_phantom: PhantomData,
         })
     }
 }
@@ -170,12 +164,12 @@ where
         context: TwoPhaseCommitContext<P, T, TwoPhaseCommitRoleContext<P, T>>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            alarm: context.alarm,
             coordinator: context.coordinator,
             epoch: context.epoch,
             last_commit_epoch: context.last_commit_epoch,
             role_context: context.role_context.try_into()?,
             this_process: context.this_process,
+            time_phantom: PhantomData,
         })
     }
 }
@@ -189,12 +183,12 @@ where
 {
     fn from(context: TwoPhaseCommitContext<P, T, CoordinatorContext<P, T>>) -> Self {
         Self {
-            alarm: context.alarm,
             coordinator: context.coordinator,
             epoch: context.epoch,
             last_commit_epoch: context.last_commit_epoch,
             role_context: context.role_context.into(),
             this_process: context.this_process,
+            time_phantom: PhantomData,
         }
     }
 }
@@ -208,12 +202,12 @@ where
 {
     fn from(context: TwoPhaseCommitContext<P, T, ParticipantContext<P, T>>) -> Self {
         Self {
-            alarm: context.alarm,
             coordinator: context.coordinator,
             epoch: context.epoch,
             last_commit_epoch: context.last_commit_epoch,
             role_context: context.role_context.into(),
             this_process: context.this_process,
+            time_phantom: PhantomData,
         }
     }
 }
