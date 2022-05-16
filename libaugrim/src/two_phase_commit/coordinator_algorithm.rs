@@ -204,6 +204,11 @@ where
                         ))
                     }
 
+                    // Notify that we've committed.
+                    actions.push(CoordinatorAction::Notify(
+                        CoordinatorActionNotification::Commit(),
+                    ));
+
                     // Always advance the epoch immediately after a commit decision.
                     self.push_advance_epoch_actions(context, &mut actions);
                 } else {

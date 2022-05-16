@@ -233,6 +233,11 @@ where
                     alarm: None,
                 });
 
+                // Notify that we've committed.
+                actions.push(ParticipantAction::Notify(
+                    ParticipantActionNotification::Commit(),
+                ));
+
                 Ok(actions)
             }
             ParticipantEvent::Deliver(_process, ParticipantMessage::Abort(epoch)) => {
@@ -267,6 +272,11 @@ where
                     context: context.clone(),
                     alarm: None,
                 });
+
+                // Notify that we've aborted.
+                actions.push(ParticipantAction::Notify(
+                    ParticipantActionNotification::Abort(),
+                ));
 
                 Ok(actions)
             }
@@ -359,6 +369,11 @@ where
                         context: context.clone(),
                         alarm: None,
                     });
+
+                    // Notify that we've aborted.
+                    actions.push(ParticipantAction::Notify(
+                        ParticipantActionNotification::Abort(),
+                    ));
                 }
 
                 // Send the vote to the coordinator.
