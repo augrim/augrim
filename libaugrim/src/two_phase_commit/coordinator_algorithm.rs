@@ -303,7 +303,7 @@ where
                 // in practice because we will have advanced the epoch and the epoch is checked
                 // above; however, this could occur if not all Update actions were run
                 // successfully.
-                if matches!(
+                if !matches!(
                     context_state,
                     CoordinatorState::Voting {
                         vote_timeout_start: _,
