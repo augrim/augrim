@@ -20,18 +20,35 @@ use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 use crate::error::{AlgorithmError, InternalError};
-use crate::process::Process;
 
+/// A value to be agreed upon between processes.
 pub trait Value: Clone {}
 
-pub trait Algorithm<P>
-where
-    P: Process,
-{
+/// A consensus algorithm.
+///
+/// An algorithm processes events with a given context, producing a set of actions.
+///
+/// Events are inputs into the algorithm. For example, if a message is received from another
+/// process, it is input into the algorithm as an event (likely a message delivery event).
+///
+/// Actions are the outputs of the algorithm. For example, the algorithm may output an action to
+/// update the context and another action to send a message to another process.
+///
+/// The context of the algorithm contains the state of the algorithm which must be remembered
+/// between events. For example, if an algorithm must keep track of how other processes have voted,
+/// it will be stored in the context. A context is passed in with an event and updated using an
+/// action.
+pub trait Algorithm {
+    /// The event type representing all valid events for the algorithm.
     type Event;
+
+    /// The action type representing all valid actions returned by the algorithm.
     type Action;
+
+    /// The context type representing all algorithm-specific state which must be stored.
     type Context;
 
+    /// Process an event with a given context, producing a list of actions.
     fn event(
         &self,
         event: Self::Event,
@@ -56,12 +73,10 @@ where
     /// struct ExampleAction(Option<u32>);
     /// struct ExampleContext(u32);
     /// # #[derive(Debug, Eq, PartialEq, Clone)]
-    /// # struct ExampleProcess;
-    /// # impl augrim::Process for ExampleProcess {}
     ///
     /// struct ExampleAlgorithm;
     ///
-    /// impl Algorithm<ExampleProcess> for ExampleAlgorithm {
+    /// impl Algorithm for ExampleAlgorithm {
     ///     type Event = ExampleEvent;
     ///     type Action = ExampleAction;
     ///     type Context = ExampleContext;
@@ -86,7 +101,7 @@ where
     /// would be an algorithm with the following types:
     ///
     /// ```ignore
-    /// impl Algorithm<P, Event=Option<&'_ str>, Context=&'_ str, Action=Option<String>>
+    /// impl Algorithm<Event=Option<&'_ str>, Context=&'_ str, Action=Option<String>>
     /// ```
     ///
     /// We can see it used as follows:
@@ -108,7 +123,7 @@ where
     /// # }
     ///
     /// ```
-    fn into_algorithm<E, A, C>(self) -> IntoAlgorithm<Self, P, E, A, C>
+    fn into_algorithm<E, A, C>(self) -> IntoAlgorithm<Self, E, A, C>
     where
         Self: Sized,
         Self::Event: TryFrom<E, Error = InternalError>,
@@ -117,7 +132,6 @@ where
     {
         IntoAlgorithm {
             inner: self,
-            _process: PhantomData,
             _event: PhantomData,
             _action: PhantomData,
             _context: PhantomData,
@@ -125,21 +139,22 @@ where
     }
 }
 
-pub struct IntoAlgorithm<T, P, E, A, C> {
+/// An algorithm that wraps an algorithm of another type.
+///
+/// This `struct` is returned by the [`Algorithm::into_algorithm`] method.
+pub struct IntoAlgorithm<T, E, A, C> {
     inner: T,
-    _process: PhantomData<P>,
     _event: PhantomData<E>,
     _action: PhantomData<A>,
     _context: PhantomData<C>,
 }
 
-impl<T, P, E, A, C> Algorithm<P> for IntoAlgorithm<T, P, E, A, C>
+impl<T, E, A, C> Algorithm for IntoAlgorithm<T, E, A, C>
 where
-    P: Process,
-    T: Algorithm<P>,
-    <T as Algorithm<P>>::Event: TryFrom<E, Error = InternalError>,
-    A: TryFrom<<T as Algorithm<P>>::Action, Error = InternalError>,
-    <T as Algorithm<P>>::Context: TryFrom<C, Error = InternalError>,
+    T: Algorithm,
+    <T as Algorithm>::Event: TryFrom<E, Error = InternalError>,
+    A: TryFrom<<T as Algorithm>::Action, Error = InternalError>,
+    <T as Algorithm>::Context: TryFrom<C, Error = InternalError>,
 {
     type Event = E;
     type Action = A;
@@ -205,11 +220,9 @@ mod tests {
     #[derive(Debug, Eq, PartialEq, Clone)]
     struct TestProcess;
 
-    impl Process for TestProcess {}
-
     struct TestAlgorithm;
 
-    impl Algorithm<TestProcess> for TestAlgorithm {
+    impl Algorithm for TestAlgorithm {
         type Event = TestEvent;
         type Action = TestAction;
         type Context = TestContext;

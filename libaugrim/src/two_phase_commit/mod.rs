@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! An implementation of the 2PC (Two-Phase Commit) consensus algorithm.
+//! An implementation of the 2PC (Two-Phase Commit) atomic commitment protocol.
+//!
+//! The algorithm attempts to faithfully implement 2PC as it is described in the following source:
+//!
+//! - Bernstein, Hadzilacos, and Goodman, Concurrency Control and Recovery in Database Systems,
+//!   7.4.  This book may be downloaded for free from
+//!   <https://www.microsoft.com/en-us/research/people/philbe/>.
 
 mod coordinator_action;
 mod coordinator_algorithm;
@@ -53,4 +59,11 @@ pub use unified_message::TwoPhaseCommitMessage;
 pub use unified_role::TwoPhaseCommitRoleContext;
 pub use unified_state::TwoPhaseCommitState;
 
+/// The scope of a single run through the algorithm.
+///
+/// An epoch starts with the coordinator requesting votes for a specific value and ends with
+/// a decision to commit or abort.
+///
+/// This extension to the original algorithm allows running the algorithm continuously, to agree on
+/// a sequence of values instead of a single value. In each iteration, the epoch increases by 1.
 pub type Epoch = u64;

@@ -20,16 +20,29 @@ use std::ops::Add;
 use std::time::Duration;
 use std::time::SystemTime;
 
+/// A specific instant in time.
+///
+/// Algorithms which use time, common for implementing timeouts, define time using this trait. The
+/// user of the algorithm can implement this Time trait on the specific type desired for their
+/// application.
 pub trait Time: Add<Duration, Output = Self> + PartialOrd + Copy + Debug {}
 
+/// A factory for getting the current time.
+///
+/// This factory is used by algorithms which need to get the current time (for example, to
+/// determine if a timeout has occurred). Any implementations of [`Time`] will likely need to also
+/// implement this trait as well.
 pub trait TimeSource {
     type Time: Time;
 
+    /// Return the current time.
     fn now(&self) -> Self::Time;
 }
 
+/// [`SystemTime`] can be used directly as Time. See also [`SystemTimeFactory`].
 impl Time for SystemTime {}
 
+/// An implementation of [`TimeSource`] which works with [`SystemTime`].
 #[derive(Default, Clone)]
 pub struct SystemTimeFactory {}
 

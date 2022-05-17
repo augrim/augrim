@@ -121,7 +121,7 @@ where
     }
 }
 
-impl<P, V, TS> Algorithm<P> for CoordinatorAlgorithm<P, V, TS>
+impl<P, V, TS> Algorithm for CoordinatorAlgorithm<P, V, TS>
 where
     P: Process,
     V: Value,

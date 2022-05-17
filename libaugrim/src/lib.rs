@@ -12,6 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # Augrim
+//!
+//! Augrim is a collection of reusable consensus algorithms.
+//!
+//! # Using Augrim's Algorithms
+//!
+//! To use an algorithm, your application will commonly need to do two primary things:
+//!
+//! - Input [`Events`] into the [`Algorithm::event`] method.
+//! - Process the list of [`Actions`] returned by the [`Algorithm::event`] method.
+//!
+//! [`Actions`]: trait.Algorithm.html#associatedtype.Action
+//! [`Events`]: trait.Algorithm.html#associatedtype.Event
+//!
+//! The specific actions and events differ by algorithm; refer to the algorithm's documentation.
+
 #[macro_use]
 extern crate log;
 
