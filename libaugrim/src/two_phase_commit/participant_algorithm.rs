@@ -55,6 +55,24 @@ where
             time_source,
         }
     }
+
+    // Create actions for advancing to the next epoch. This set of actions is generated whenever
+    // a decision has been reached, either abort or commit.
+    fn push_advance_epoch_actions(
+        &self,
+        mut context: TwoPhaseCommitContext<P, TS::Time, ParticipantContext<P, TS::Time>>,
+        actions: &mut Vec<ParticipantAction<P, V, TS::Time>>,
+    ) {
+        // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
+        // used to answer DecisionRequest messages.
+        context.set_last_commit_epoch(Some(*context.epoch()));
+        context.set_epoch(context.epoch() + 1);
+        context.set_state(ParticipantState::WaitingForVoteRequest);
+        actions.push(ParticipantAction::Update {
+            context,
+            alarm: None,
+        });
+    }
 }
 
 impl<P, V, TS> Algorithm for ParticipantAlgorithm<P, V, TS>
@@ -238,6 +256,8 @@ where
                     ParticipantActionNotification::Commit(),
                 ));
 
+                self.push_advance_epoch_actions(context, &mut actions);
+
                 Ok(actions)
             }
             ParticipantEvent::Deliver(_process, ParticipantMessage::Abort(epoch)) => {
@@ -277,6 +297,8 @@ where
                 actions.push(ParticipantAction::Notify(
                     ParticipantActionNotification::Abort(),
                 ));
+
+                self.push_advance_epoch_actions(context, &mut actions);
 
                 Ok(actions)
             }
@@ -374,6 +396,8 @@ where
                     actions.push(ParticipantAction::Notify(
                         ParticipantActionNotification::Abort(),
                     ));
+
+                    self.push_advance_epoch_actions(context.clone(), &mut actions);
                 }
 
                 // Send the vote to the coordinator.

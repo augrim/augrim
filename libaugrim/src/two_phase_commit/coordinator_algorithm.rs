@@ -94,14 +94,14 @@ where
         ));
 
         // When an abort decision is made, always advance the epoch as well.
-        self.push_advance_epoch_actions(context, actions);
+        self.push_advance_epoch_actions(&mut context, actions);
     }
 
     // Create actions for advancing to the next epoch. This set of actions is generated whenever
     // a decision has been reached, either abort or commit.
     fn push_advance_epoch_actions(
         &self,
-        mut context: TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>,
+        context: &mut TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>,
         actions: &mut Vec<CoordinatorAction<P, V, TS::Time>>,
     ) {
         // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
@@ -110,7 +110,7 @@ where
         context.set_epoch(context.epoch() + 1);
         context.set_state(CoordinatorState::WaitingForStart);
         actions.push(CoordinatorAction::Update {
-            context,
+            context: context.clone(),
             alarm: None,
         });
 
@@ -210,7 +210,7 @@ where
                     ));
 
                     // Always advance the epoch immediately after a commit decision.
-                    self.push_advance_epoch_actions(context, &mut actions);
+                    self.push_advance_epoch_actions(&mut context, &mut actions);
                 } else {
                     self.push_abort_actions(context, &mut actions);
                 }
@@ -257,7 +257,7 @@ where
                 // advancing to the next epoch.
                 CoordinatorState::Commit => {
                     let mut actions = Vec::new();
-                    self.push_advance_epoch_actions(context, &mut actions);
+                    self.push_advance_epoch_actions(&mut context, &mut actions);
                     Ok(actions)
                 }
 
@@ -265,7 +265,7 @@ where
                 // advancing to the next epoch.
                 CoordinatorState::Abort => {
                     let mut actions = Vec::new();
-                    self.push_advance_epoch_actions(context, &mut actions);
+                    self.push_advance_epoch_actions(&mut context, &mut actions);
                     Ok(actions)
                 }
             },
