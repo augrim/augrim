@@ -109,6 +109,10 @@ where
         context.set_last_commit_epoch(Some(*context.epoch()));
         context.set_epoch(context.epoch() + 1);
         context.set_state(CoordinatorState::WaitingForStart);
+        context
+            .participants_mut()
+            .iter_mut()
+            .for_each(|participant| participant.vote = None);
         actions.push(CoordinatorAction::Update {
             context: context.clone(),
             alarm: None,
