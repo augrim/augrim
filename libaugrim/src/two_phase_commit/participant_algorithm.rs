@@ -19,6 +19,7 @@ use crate::algorithm::{Algorithm, Value};
 use crate::error::{AlgorithmError, InvalidStateError};
 use crate::process::Process;
 use crate::time::TimeSource;
+use crate::two_phase_commit::Epoch;
 
 use super::ParticipantAction;
 use super::ParticipantActionNotification;
@@ -54,6 +55,24 @@ where
             _value_phantom: PhantomData,
             time_source,
         }
+    }
+
+    // Create actions for advancing to the next epoch. This set of actions is generated whenever
+    // a decision has been reached, either abort or commit.
+    fn push_advance_epoch_actions(
+        &self,
+        context: &mut TwoPhaseCommitContext<P, TS::Time, ParticipantContext<P, TS::Time>>,
+        actions: &mut Vec<ParticipantAction<P, V, TS::Time>>,
+        epoch: Epoch,
+    ) {
+        // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
+        // used to answer DecisionRequest messages.
+        context.set_last_commit_epoch(Some(*context.epoch()));
+        context.set_epoch(epoch);
+        actions.push(ParticipantAction::Update {
+            context: context.clone(),
+            alarm: None,
+        });
     }
 }
 
@@ -165,15 +184,6 @@ where
                     )]);
                 }
 
-                // A VoteRequest must be for the current epoch to be processed, drop it otherwise.
-                if *context.epoch() != epoch {
-                    return Ok(vec![ParticipantAction::Notify(
-                        ParticipantActionNotification::MessageDropped(
-                            "epoch is not the current epoch".into(),
-                        ),
-                    )]);
-                }
-
                 // A VoteRequest can only be processed when we are waiting for one, drop it
                 // otherwise.
                 if !matches!(context.state(), ParticipantState::WaitingForVoteRequest) {
@@ -184,7 +194,21 @@ where
                     )]);
                 }
 
+                // New epoch must be greater than the previous epoch.
+                if *context.epoch() >= epoch {
+                    return Ok(vec![ParticipantAction::Notify(
+                        ParticipantActionNotification::MessageDropped(format!(
+                            "epoch {} was not greater than previous epoch {}",
+                            epoch,
+                            *context.epoch()
+                        )),
+                    )]);
+                }
+
                 let mut actions = Vec::new();
+
+                // Advance the epoch to the epoch sent from the coordinator
+                self.push_advance_epoch_actions(&mut context, &mut actions, epoch);
 
                 // Update the context with the new state of WaitingForVote
                 context.set_state(ParticipantState::WaitingForVote);
@@ -233,6 +257,18 @@ where
                     alarm: None,
                 });
 
+                // Notify that we've committed.
+                actions.push(ParticipantAction::Notify(
+                    ParticipantActionNotification::Commit(),
+                ));
+
+                // Switch to WaitingForVoteRequest to prepare for the next epoch
+                context.set_state(ParticipantState::WaitingForVoteRequest);
+                actions.push(ParticipantAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
+
                 Ok(actions)
             }
             ParticipantEvent::Deliver(_process, ParticipantMessage::Abort(epoch)) => {
@@ -263,6 +299,18 @@ where
 
                 // The vote was no, so record our decision to Abort.
                 context.set_state(ParticipantState::Abort);
+                actions.push(ParticipantAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
+
+                // Notify that we've aborted.
+                actions.push(ParticipantAction::Notify(
+                    ParticipantActionNotification::Abort(),
+                ));
+
+                // Switch to WaitingForVoteRequest to prepare for the next epoch
+                context.set_state(ParticipantState::WaitingForVoteRequest);
                 actions.push(ParticipantAction::Update {
                     context: context.clone(),
                     alarm: None,
@@ -355,6 +403,18 @@ where
                 } else {
                     // The vote was no, so record our decision to Abort.
                     context.set_state(ParticipantState::Abort);
+                    actions.push(ParticipantAction::Update {
+                        context: context.clone(),
+                        alarm: None,
+                    });
+
+                    // Notify that we've aborted.
+                    actions.push(ParticipantAction::Notify(
+                        ParticipantActionNotification::Abort(),
+                    ));
+
+                    // Switch to WaitingForVoteRequest to prepare for the next epoch
+                    context.set_state(ParticipantState::WaitingForVoteRequest);
                     actions.push(ParticipantAction::Update {
                         context: context.clone(),
                         alarm: None,
