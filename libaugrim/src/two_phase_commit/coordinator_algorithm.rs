@@ -106,7 +106,9 @@ where
     ) {
         // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
         // used to answer DecisionRequest messages.
-        context.set_last_commit_epoch(Some(*context.epoch()));
+        if *context.state() == CoordinatorState::Commit {
+            context.set_last_commit_epoch(Some(*context.epoch()));
+        }
         context.set_epoch(context.epoch() + 1);
         context.set_state(CoordinatorState::WaitingForStart);
         context
