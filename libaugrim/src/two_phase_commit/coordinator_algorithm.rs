@@ -106,7 +106,9 @@ where
     ) {
         // Update the epoch and set the state to WaitingForStart. Also update the last commit epoch
         // used to answer DecisionRequest messages.
-        context.set_last_commit_epoch(Some(*context.epoch()));
+        if *context.state() == CoordinatorState::Commit {
+            context.set_last_commit_epoch(Some(*context.epoch()));
+        }
         context.set_epoch(context.epoch() + 1);
         context.set_state(CoordinatorState::WaitingForStart);
         context
@@ -416,9 +418,13 @@ where
                 // know what the future holds. Similarly, we do not yet have a decision for the
                 // current epoch or we would have advanced to the next epoch already.
                 Ok(vec![CoordinatorAction::Notify(
-                    CoordinatorActionNotification::MessageDropped(
-                        "decision for requested epoch is unknown".into(),
-                    ),
+                    CoordinatorActionNotification::MessageDropped(format!(
+                        "decision for requested epoch {} is unknown (current epoch: {}, \
+                        last commit epoch: {:?})",
+                        epoch,
+                        context.epoch(),
+                        context.last_commit_epoch()
+                    )),
                 )])
             }
         }
