@@ -32,6 +32,9 @@ pub enum TwoPhaseCommitState<T> {
     WaitingForStart,
     WaitingForVoteRequest,
     WaitingForVote,
+    WaitingForDecisionAck {
+        ack_timeout_start: T,
+    },
 }
 
 impl<T> TryFrom<TwoPhaseCommitState<T>> for CoordinatorState<T>
@@ -49,6 +52,9 @@ where
             }
             TwoPhaseCommitState::WaitingForStart => Ok(CoordinatorState::WaitingForStart),
             TwoPhaseCommitState::WaitingForVote => Ok(CoordinatorState::WaitingForVote),
+            TwoPhaseCommitState::WaitingForDecisionAck { ack_timeout_start } => {
+                Ok(CoordinatorState::WaitingForDecisionAck { ack_timeout_start })
+            }
             _ => Err(InvalidStateError::with_message(format!(
                 "invalid state for coordinator: {:?}",
                 state
@@ -99,6 +105,9 @@ where
             }
             CoordinatorState::WaitingForStart => TwoPhaseCommitState::WaitingForStart,
             CoordinatorState::WaitingForVote => TwoPhaseCommitState::WaitingForVote,
+            CoordinatorState::WaitingForDecisionAck { ack_timeout_start } => {
+                TwoPhaseCommitState::WaitingForDecisionAck { ack_timeout_start }
+            }
         }
     }
 }

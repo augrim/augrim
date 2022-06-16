@@ -224,7 +224,7 @@ where
 
                 Ok(actions)
             }
-            ParticipantEvent::Deliver(_process, ParticipantMessage::Commit(epoch)) => {
+            ParticipantEvent::Deliver(process, ParticipantMessage::Commit(epoch)) => {
                 // A Commit must be for the current epoch to be processed, drop it otherwise.
                 if *context.epoch() != epoch {
                     return Ok(vec![ParticipantAction::Notify(
@@ -260,6 +260,12 @@ where
                 // Notify that we've committed.
                 actions.push(ParticipantAction::Notify(
                     ParticipantActionNotification::Commit(),
+                ));
+
+                // Send an acknowledgement back to the coordinator.
+                actions.push(ParticipantAction::SendMessage(
+                    process,
+                    TwoPhaseCommitMessage::DecisionAck(epoch),
                 ));
 
                 // Switch to WaitingForVoteRequest to prepare for the next epoch
