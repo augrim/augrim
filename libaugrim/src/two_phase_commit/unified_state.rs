@@ -55,10 +55,12 @@ where
             TwoPhaseCommitState::WaitingForDecisionAck { ack_timeout_start } => {
                 Ok(CoordinatorState::WaitingForDecisionAck { ack_timeout_start })
             }
-            _ => Err(InvalidStateError::with_message(format!(
-                "invalid state for coordinator: {:?}",
-                state
-            ))),
+            TwoPhaseCommitState::WaitingForVoteRequest | TwoPhaseCommitState::Voted { .. } => {
+                Err(InvalidStateError::with_message(format!(
+                    "invalid state for coordinator: {:?}",
+                    state
+                )))
+            }
         }
     }
 }
@@ -84,7 +86,9 @@ where
                 Ok(ParticipantState::WaitingForVoteRequest)
             }
             TwoPhaseCommitState::WaitingForVote => Ok(ParticipantState::WaitingForVote),
-            _ => Err(InvalidStateError::with_message(format!(
+            TwoPhaseCommitState::WaitingForStart
+            | TwoPhaseCommitState::WaitingForDecisionAck { .. }
+            | TwoPhaseCommitState::Voting { .. } => Err(InvalidStateError::with_message(format!(
                 "invalid state for participant: {:?}",
                 state
             ))),
