@@ -30,6 +30,7 @@ use super::TwoPhaseCommitMessage;
 pub enum CoordinatorMessage {
     VoteResponse(Epoch, bool),
     DecisionRequest(Epoch),
+    DecisionAck(Epoch),
 }
 
 impl<V> From<CoordinatorMessage> for TwoPhaseCommitMessage<V>
@@ -44,6 +45,7 @@ where
             CoordinatorMessage::DecisionRequest(epoch) => {
                 TwoPhaseCommitMessage::DecisionRequest(epoch)
             }
+            CoordinatorMessage::DecisionAck(epoch) => TwoPhaseCommitMessage::DecisionAck(epoch),
         }
     }
 }
@@ -62,6 +64,7 @@ where
             TwoPhaseCommitMessage::DecisionRequest(epoch) => {
                 Ok(CoordinatorMessage::DecisionRequest(epoch))
             }
+            TwoPhaseCommitMessage::DecisionAck(epoch) => Ok(CoordinatorMessage::DecisionAck(epoch)),
             TwoPhaseCommitMessage::VoteRequest(_, _) => Err(InvalidStateError::with_message(
                 "VoteRequest message cannot be handled by a coordinator".into(),
             )),

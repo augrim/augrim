@@ -27,6 +27,7 @@ where
     Commit(Epoch),
     Abort(Epoch),
     DecisionRequest(Epoch),
+    DecisionAck(Epoch),
 }
 
 impl<V> Message for TwoPhaseCommitMessage<V> where V: Value {}

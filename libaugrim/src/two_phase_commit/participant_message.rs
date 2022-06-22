@@ -74,6 +74,9 @@ where
             TwoPhaseCommitMessage::VoteResponse(_, _) => Err(InvalidStateError::with_message(
                 "VoteResponse message cannot be handled by a participant".into(),
             )),
+            TwoPhaseCommitMessage::DecisionAck(_) => Err(InvalidStateError::with_message(
+                "DecisionAck message cannot be handled by a participant".into(),
+            )),
         }
     }
 }

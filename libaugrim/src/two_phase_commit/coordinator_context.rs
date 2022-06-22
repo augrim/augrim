@@ -19,6 +19,7 @@ use crate::time::Time;
 pub struct Participant<P> {
     pub process: P,
     pub vote: Option<bool>,
+    pub decision_ack: bool,
 }
 
 impl<P> Participant<P> {
@@ -26,6 +27,7 @@ impl<P> Participant<P> {
         Participant {
             process,
             vote: None,
+            decision_ack: false,
         }
     }
 }
@@ -38,6 +40,7 @@ where
     Abort,
     Commit,
     Voting { vote_timeout_start: T },
+    WaitingForDecisionAck { ack_timeout_start: T },
     WaitingForStart,
     WaitingForVote,
 }

@@ -29,6 +29,13 @@ use super::CoordinatorState;
 use super::TwoPhaseCommitContext;
 use super::TwoPhaseCommitMessage;
 
+// The timeout for receiving all decision acks before continuing to the next epoch.
+//
+// This value is not important for the overall correctness fo the algorithm. A timeout here is
+// processed the same way as receiving all acks. If participants aren't ready for the next epoch,
+// they will use the recovery protocol to catch up.
+const ACK_TIMEOUT_SECONDS: u64 = 5;
+
 const VOTE_TIMEOUT_SECONDS: u64 = 30;
 
 pub struct CoordinatorAlgorithm<P, V, TS>
@@ -93,8 +100,24 @@ where
             CoordinatorActionNotification::Abort(),
         ));
 
-        // When an abort decision is made, always advance the epoch as well.
-        self.push_advance_epoch_actions(&mut context, actions);
+        // Wait for a decision ack.
+        self.push_wait_for_decision_ack(&mut context, actions);
+    }
+
+    // Create actions for switching into WaitingForDecisionAck state. This is the state after
+    // a decision has been communicated to participants, before we start a new epoch.
+    fn push_wait_for_decision_ack(
+        &self,
+        context: &mut TwoPhaseCommitContext<P, TS::Time, CoordinatorContext<P, TS::Time>>,
+        actions: &mut Vec<CoordinatorAction<P, V, TS::Time>>,
+    ) {
+        let ack_timeout_start = self.time_source.now();
+        let ack_timeout_end = ack_timeout_start + Duration::from_secs(ACK_TIMEOUT_SECONDS);
+        context.set_state(CoordinatorState::WaitingForDecisionAck { ack_timeout_start });
+        actions.push(CoordinatorAction::Update {
+            context: context.clone(),
+            alarm: Some(ack_timeout_end),
+        });
     }
 
     // Create actions for advancing to the next epoch. This set of actions is generated whenever
@@ -114,7 +137,10 @@ where
         context
             .participants_mut()
             .iter_mut()
-            .for_each(|participant| participant.vote = None);
+            .for_each(|participant| {
+                participant.vote = None;
+                participant.decision_ack = false;
+            });
         actions.push(CoordinatorAction::Update {
             context: context.clone(),
             alarm: None,
@@ -215,8 +241,8 @@ where
                         CoordinatorActionNotification::Commit(),
                     ));
 
-                    // Always advance the epoch immediately after a commit decision.
-                    self.push_advance_epoch_actions(&mut context, &mut actions);
+                    // Wait for a decision ack.
+                    self.push_wait_for_decision_ack(&mut context, &mut actions);
                 } else {
                     self.push_abort_actions(context, &mut actions);
                 }
@@ -258,6 +284,36 @@ where
                 CoordinatorState::WaitingForVote => Ok(vec![CoordinatorAction::Notify(
                     CoordinatorActionNotification::RequestForVote(),
                 )]),
+
+                // A decision ack timeout has occurred, which means we have not received all
+                // decision acks within the allowed timeout period.
+                //
+                // As the coordinator, we wait for decison acks to make it far less likely that
+                // a participant will receive the next epoch's RequestForVote before the current
+                // epoch's Commit or Abort. (Because, if they are received out of sequence, the
+                // RequestForVote will be dropped causing an Abort of that epoch by the
+                // participant.)
+                //
+                // After the timeout however, we are no longer concerned about the above race
+                // condition, so we can simply proceed to the next epoch. Any participants who have
+                // not responded with a decision ack either processed the commit/abort or will
+                // timeout and start the recovery protocol. In either case, the correct behavior
+                // for the coordinator is to continue with the next epoch.
+                CoordinatorState::WaitingForDecisionAck { ack_timeout_start } => {
+                    let mut actions = Vec::new();
+
+                    // Validate that the timeout has occurred. If this is false, we shouldn't have
+                    // been woken up with an alarm; however, we can just ignore it and wait for the
+                    // alarm to be triggered again later.
+                    if self.time_source.now()
+                        > *ack_timeout_start + Duration::from_secs(ACK_TIMEOUT_SECONDS)
+                    {
+                        // Move to the next epoch. This will unset the alarm.
+                        self.push_advance_epoch_actions(&mut context, &mut actions);
+                    }
+
+                    Ok(actions)
+                }
 
                 // Receiving alarms in the commit state is unexpected, but try and recover by
                 // advancing to the next epoch.
@@ -310,10 +366,10 @@ where
                     )]);
                 }
 
-                // Ignore the message if we are not in the voting window. This is unlikely to occur
-                // in practice because we will have advanced the epoch and the epoch is checked
-                // above; however, this could occur if not all Update actions were run
-                // successfully.
+                // Ignore the message if we are not in the voting window. This could occur if we've
+                // move on to waiting for decision acks. After that, this is unlikely to occur
+                // because we will have advanced the epoch and the epoch is checked above; however,
+                // this could occur if not all Update actions were run successfully.
                 if !matches!(
                     context_state,
                     CoordinatorState::Voting {
@@ -426,6 +482,83 @@ where
                         context.last_commit_epoch()
                     )),
                 )])
+            }
+
+            CoordinatorEvent::Deliver(process, CoordinatorMessage::DecisionAck(epoch)) => {
+                // Pull these out of context and copy/clone them because we borrow context to get
+                // a mut participant prior to using these values for additional checks.
+                let context_epoch = *context.epoch();
+                let context_state = context.state().clone();
+
+                let mut participant = match context
+                    .participants_mut()
+                    .iter_mut()
+                    .find(|participant| participant.process == process)
+                {
+                    Some(inner) => inner,
+                    None => {
+                        return Ok(vec![CoordinatorAction::Notify(
+                            CoordinatorActionNotification::MessageDropped(
+                                "sender process is not a participant".into(),
+                            ),
+                        )]);
+                    }
+                };
+
+                // Ignore the message if the ack's epoch doesn't match our context epoch. this
+                // could happen under normal operation if an ack was processed after a timeout, and
+                // is therefore not an error.
+                if context_epoch != epoch {
+                    return Ok(vec![CoordinatorAction::Notify(
+                        CoordinatorActionNotification::MessageDropped(format!(
+                            "epoch {} is not the current epoch {}",
+                            epoch, context_epoch
+                        )),
+                    )]);
+                }
+
+                // Ignore the message if we are not in the decision ack window. This is unlikely to
+                // occur in practice because we will have advanced the epoch and the epoch is
+                // checked above; however, this could occur if not all Update actions were run
+                // successfully.
+                if !matches!(
+                    context_state,
+                    CoordinatorState::WaitingForDecisionAck {
+                        ack_timeout_start: _,
+                    }
+                ) {
+                    return Ok(vec![CoordinatorAction::Notify(
+                        CoordinatorActionNotification::MessageDropped(
+                            "context state is not WaitingForDecisionAck".into(),
+                        ),
+                    )]);
+                }
+
+                // Ignore if this participant already acked. This should not occur in normal
+                // operation.
+                if participant.decision_ack {
+                    return Ok(vec![CoordinatorAction::Notify(
+                        CoordinatorActionNotification::MessageDropped(
+                            "participant has already sent a decision ack".into(),
+                        ),
+                    )]);
+                }
+
+                let mut actions = Vec::new();
+
+                // Update the context to record the participant's ack
+                participant.decision_ack = true;
+                actions.push(CoordinatorAction::Update {
+                    context: context.clone(),
+                    alarm: None,
+                });
+
+                // If all the participants have acked, then move to the next epoch.
+                if context.participants().iter().all(|p| p.decision_ack) {
+                    self.push_advance_epoch_actions(&mut context, &mut actions);
+                }
+
+                Ok(actions)
             }
         }
     }
