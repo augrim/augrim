@@ -275,15 +275,30 @@ where
 
                 // If we receive an alarm when in the RequestforStart state, then we re-generate
                 // a RequestForStart notification.
-                CoordinatorState::WaitingForStart => Ok(vec![CoordinatorAction::Notify(
-                    CoordinatorActionNotification::RequestForStart(),
-                )]),
+                //
+                // An alarm in this state is expected to occur during initialization; in that
+                // situation, this alarm is the first event to be processed. If this alarm occurs
+                // in other circumstances, it indicates a bug (possibly in how the caller is using
+                // the algorithm), but we process it anyway in hopes of recovery.
+                CoordinatorState::WaitingForStart => Ok(vec![
+                    CoordinatorAction::Notify(CoordinatorActionNotification::RequestForStart()),
+                    CoordinatorAction::Update {
+                        context,
+                        alarm: None,
+                    },
+                ]),
 
                 // If we receive an alarm an the RequestforStart state, then we re-generate
-                // a RequestForVote notification.
-                CoordinatorState::WaitingForVote => Ok(vec![CoordinatorAction::Notify(
-                    CoordinatorActionNotification::RequestForVote(),
-                )]),
+                // a RequestForVote notification. Since this is unexpected, it indicates a bug
+                // (possibly in how the caller is using the algorithm), but we process it anyway in
+                // hopes of recovery.
+                CoordinatorState::WaitingForVote => Ok(vec![
+                    CoordinatorAction::Notify(CoordinatorActionNotification::RequestForVote()),
+                    CoordinatorAction::Update {
+                        context,
+                        alarm: None,
+                    },
+                ]),
 
                 // A decision ack timeout has occurred, which means we have not received all
                 // decision acks within the allowed timeout period.
