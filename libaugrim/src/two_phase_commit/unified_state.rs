@@ -18,7 +18,7 @@ use crate::time::Time;
 use super::CoordinatorState;
 use super::ParticipantState;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TwoPhaseCommitState<T> {
     Abort,
     Commit,
