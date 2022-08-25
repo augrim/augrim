@@ -15,7 +15,7 @@
 use crate::process::Process;
 use crate::time::Time;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Participant<P> {
     pub process: P,
     pub vote: Option<bool>,
@@ -32,7 +32,7 @@ impl<P> Participant<P> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum CoordinatorState<T>
 where
     T: Time,
@@ -45,7 +45,7 @@ where
     WaitingForVote,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CoordinatorContext<P, T>
 where
     P: Process,

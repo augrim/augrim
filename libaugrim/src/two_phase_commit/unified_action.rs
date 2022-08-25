@@ -34,7 +34,7 @@ where
     Notify(TwoPhaseCommitActionNotification<V>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum TwoPhaseCommitActionNotification<V>
 where
     V: Value,
