@@ -41,7 +41,7 @@ jobs:
   publish_to_crates:
     needs: build
     if: >-
-      github.repository_owner == 'splintercommunity'
+      github.repository_owner == 'augrim'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
