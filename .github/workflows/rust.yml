@@ -36,7 +36,7 @@ jobs:
     - name: Print rustc version
       run: rustc --version
     - name: Install Just
-      run: cargo install just
+      run: sudo snap install --edge --classic just
     - name: Lint
       run: just lint
     - name: Build
