@@ -15,7 +15,7 @@
 
 [package]
 name = "augrim"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Bitwise IO, Inc.", "Cargill Corporation"]
 edition = "2021"
 license = "Apache-2.0"
@@ -29,7 +29,9 @@ repository = "https://github.com/augrim/augrim"
 log = "0.4"
 
 [features]
-default = []
+default = [
+    "algorithm",
+]
 
 stable = [
     # The stable feature extends default:
@@ -41,7 +43,6 @@ experimental = [
     # The experimental feature extends stable:
     "stable",
     # The following features are experimental:
-    "algorithm",
     "algorithm-two-phase-commit",
     "time",
 ]
@@ -49,3 +50,9 @@ experimental = [
 algorithm = []
 algorithm-two-phase-commit = ["algorithm", "time"]
 time = []
+
+[package.metadata.docs.rs]
+features = [
+  "stable",
+  "experimental"
+]
