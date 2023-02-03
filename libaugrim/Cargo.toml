@@ -1,4 +1,5 @@
 # Copyright 2021 Cargill Incorporated
+# Copyright 2023 Bitwise IO, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +18,12 @@ name = "augrim"
 version = "0.1.0"
 authors = ["Bitwise IO, Inc.", "Cargill Corporation"]
 edition = "2021"
+license = "Apache-2.0"
+readme = "../README.md"
+description = """\
+    Augrim is a library of consensus algorithms implemented in Rust.
+"""
+repository = "https://github.com/augrim/augrim"
 
 [dependencies]
 log = "0.4"
