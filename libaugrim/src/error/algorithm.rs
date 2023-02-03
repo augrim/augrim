@@ -42,8 +42,8 @@ impl Error for AlgorithmError {
 impl Display for AlgorithmError {
     fn fmt(&self, f: &mut Formatter) -> FormatResult {
         match self {
-            AlgorithmError::InvalidState(e) => write!(f, "{}", e),
-            AlgorithmError::Internal(e) => write!(f, "{}", e),
+            AlgorithmError::InvalidState(e) => write!(f, "{e}"),
+            AlgorithmError::Internal(e) => write!(f, "{e}"),
         }
     }
 }

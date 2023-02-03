@@ -149,10 +149,10 @@ impl error::Error for InternalError {
 impl fmt::Display for InternalError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.message {
-            Some(m) => write!(f, "{}", m),
+            Some(m) => write!(f, "{m}"),
             None => match &self.source {
                 Some(s) => match &s.prefix {
-                    Some(p) => write!(f, "{}: {}", p, s.source),
+                    Some(p) => write!(f, "{p}: {}", s.source),
                     None => write!(f, "{}", s.source),
                 },
                 None => write!(f, "{}", std::any::type_name::<InternalError>()),
