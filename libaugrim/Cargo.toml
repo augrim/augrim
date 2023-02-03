@@ -15,7 +15,7 @@
 [package]
 name = "augrim"
 version = "0.1.0"
-authors = ["Cargill Corporation"]
+authors = ["Bitwise IO, Inc.", "Cargill Corporation"]
 edition = "2021"
 
 [dependencies]
