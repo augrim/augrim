@@ -57,8 +57,7 @@ where
             }
             TwoPhaseCommitState::WaitingForVoteRequest | TwoPhaseCommitState::Voted { .. } => {
                 Err(InvalidStateError::with_message(format!(
-                    "invalid state for coordinator: {:?}",
-                    state
+                    "invalid state for coordinator: {state:?}",
                 )))
             }
         }
@@ -89,8 +88,7 @@ where
             TwoPhaseCommitState::WaitingForStart
             | TwoPhaseCommitState::WaitingForDecisionAck { .. }
             | TwoPhaseCommitState::Voting { .. } => Err(InvalidStateError::with_message(format!(
-                "invalid state for participant: {:?}",
-                state
+                "invalid state for participant: {state:?}",
             ))),
         }
     }

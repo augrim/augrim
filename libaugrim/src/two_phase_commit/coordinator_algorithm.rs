@@ -526,8 +526,7 @@ where
                 if context_epoch != epoch {
                     return Ok(vec![CoordinatorAction::Notify(
                         CoordinatorActionNotification::MessageDropped(format!(
-                            "epoch {} is not the current epoch {}",
-                            epoch, context_epoch
+                            "epoch {epoch} is not the current epoch {context_epoch}",
                         )),
                     )]);
                 }
