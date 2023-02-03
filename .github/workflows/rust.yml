@@ -38,8 +38,8 @@ jobs:
     - name: Install Just
       run: cargo install just
     - name: Lint
-      run: just ci-lint
+      run: just lint
     - name: Build
-      run: just ci-build
+      run: just build
     - name: Run tests
-      run: just ci-test
+      run: just test
