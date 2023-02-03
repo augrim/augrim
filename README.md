@@ -12,8 +12,9 @@ Current algorithms implemented:
 
 The following resources are available for Augrim:
 
+  * [Website](https://augrim.org/)
   * [Crate](https://crates.io/crates/augrim)
-  * [Documentation](https://augrim.org/)
+  * [Documentation](https://docs.rs/augrim/latest/augrim/))
   * [Git Repository](https://github.com/augrim/augrim)
 
 ## License

@@ -49,3 +49,9 @@ experimental = [
 algorithm = []
 algorithm-two-phase-commit = ["algorithm", "time"]
 time = []
+
+[package.metadata.docs.rs]
+features = [
+  "stable",
+  "experimental"
+]
