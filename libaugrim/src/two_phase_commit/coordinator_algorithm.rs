@@ -355,7 +355,7 @@ where
                 let context_epoch = *context.epoch();
                 let context_state = context.state().clone();
 
-                let mut participant = match context
+                let participant = match context
                     .participants_mut()
                     .iter_mut()
                     .find(|participant| participant.process == process)
@@ -505,7 +505,7 @@ where
                 let context_epoch = *context.epoch();
                 let context_state = context.state().clone();
 
-                let mut participant = match context
+                let participant = match context
                     .participants_mut()
                     .iter_mut()
                     .find(|participant| participant.process == process)
