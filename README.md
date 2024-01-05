@@ -16,6 +16,7 @@ The following resources are available for Augrim:
   * [Crate](https://crates.io/crates/augrim)
   * [Documentation](https://docs.rs/augrim/latest/augrim/)
   * [Git Repository](https://github.com/augrim/augrim)
+  * [#augrim Discord channel](https://discord.gg/gt6XXG628c)
 
 ## License
 
