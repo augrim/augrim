@@ -28,9 +28,6 @@
 //!
 //! The specific actions and events differ by algorithm; refer to the algorithm's documentation.
 
-#[macro_use]
-extern crate log;
-
 #[cfg(feature = "algorithm")]
 mod algorithm;
 pub mod error;
