@@ -15,7 +15,7 @@
 
 [package]
 name = "augrim"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["Bitwise IO, Inc.", "Cargill Corporation"]
 edition = "2021"
 license = "Apache-2.0"
@@ -26,7 +26,7 @@ description = """\
 repository = "https://github.com/augrim/augrim"
 
 [dependencies]
-log = "0.4"
+errling = "0.1"
 
 [features]
 default = [
