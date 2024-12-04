@@ -217,8 +217,6 @@ mod tests {
     struct TestEvent(Option<u32>);
     struct TestAction(Option<u32>);
     struct TestContext(u32);
-    #[derive(Debug, Eq, PartialEq, Clone)]
-    struct TestProcess;
 
     struct TestAlgorithm;
 
